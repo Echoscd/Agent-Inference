@@ -59,6 +59,7 @@ fresh clone can recompute: [docs/reproducing.md](docs/reproducing.md).
 | [docs/experiments.md](docs/experiments.md) | what each `result/` folder is |
 | [docs/limitations.md](docs/limitations.md) | what these results do not support |
 | [worklog/](worklog/) | weekly TODOs and experiment progress |
+| [log/](log/) | dated working notes and analyses |
 
 ## Attribution
 

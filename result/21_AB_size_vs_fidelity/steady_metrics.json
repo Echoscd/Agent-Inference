@@ -1,0 +1,228 @@
+[
+  {
+    "run": "21_AB_size_vs_fidelity",
+    "arm": "A",
+    "policy": null,
+    "model": "qwen3-32b",
+    "workers": 80,
+    "programs_in_tape": 80,
+    "programs_completed": 80,
+    "calls_total": 658,
+    "timeline": "reconstructed",
+    "wall_s_sampler": 4741.6,
+    "wall_s_calls": 4732.1,
+    "max_kv_perc": 100.0,
+    "t_warm_s": 40.1,
+    "t_drain_s": 4319.1,
+    "kv_peak_perc": 100.0,
+    "kv_avg_perc": 87.5,
+    "max_running": 80,
+    "avg_running": 13.4,
+    "max_waiting": 72,
+    "preemptions": 160,
+    "prefix_hit_rate": 0.308,
+    "full": {
+      "window_s": 4732.1,
+      "t0_s": 0.0,
+      "t1_s": 4732.1,
+      "calls_started": 658,
+      "gen_tokens_in_window": 1327002.0,
+      "gen_tps": 280.4,
+      "prompt_tps": 1975.9,
+      "calls_per_s": 0.139,
+      "latency_s": {
+        "p50": 105.7,
+        "p90": 724.5,
+        "p95": 1019.2,
+        "p99": 1625.5
+      },
+      "latency_mean_s": 278.0,
+      "latency_max_s": 2229.2,
+      "wait_s": {
+        "p50": 18.2,
+        "p90": 617.9,
+        "p95": 729.2,
+        "p99": 1298.6
+      },
+      "decode_s": {
+        "p50": 53.9,
+        "p90": 366.2,
+        "p95": 383.2,
+        "p99": 410.3
+      }
+    },
+    "warm": {
+      "window_s": 4692.0,
+      "t0_s": 40.1,
+      "t1_s": 4732.1,
+      "calls_started": 574,
+      "gen_tokens_in_window": 1294683.5,
+      "gen_tps": 275.9,
+      "prompt_tps": 1939.7,
+      "calls_per_s": 0.122,
+      "latency_s": {
+        "p50": 122.3,
+        "p90": 755.5,
+        "p95": 1057.0,
+        "p99": 1656.8
+      },
+      "latency_mean_s": 303.1,
+      "latency_max_s": 2229.2,
+      "wait_s": {
+        "p50": 28.5,
+        "p90": 634.4,
+        "p95": 783.4,
+        "p99": 1367.5
+      },
+      "decode_s": {
+        "p50": 53.1,
+        "p90": 370.6,
+        "p95": 383.8,
+        "p99": 413.6
+      }
+    },
+    "steady": {
+      "window_s": 4279.1,
+      "t0_s": 40.1,
+      "t1_s": 4319.1,
+      "calls_started": 560,
+      "gen_tokens_in_window": 1265218.5,
+      "gen_tps": 295.7,
+      "prompt_tps": 2023.0,
+      "calls_per_s": 0.131,
+      "latency_s": {
+        "p50": 128.5,
+        "p90": 762.2,
+        "p95": 1065.8,
+        "p99": 1671.9
+      },
+      "latency_mean_s": 309.6,
+      "latency_max_s": 2229.2,
+      "wait_s": {
+        "p50": 30.5,
+        "p90": 636.9,
+        "p95": 790.8,
+        "p99": 1369.9
+      },
+      "decode_s": {
+        "p50": 54.5,
+        "p90": 372.9,
+        "p95": 383.9,
+        "p99": 413.6
+      }
+    }
+  },
+  {
+    "run": "21_AB_size_vs_fidelity",
+    "arm": "B",
+    "policy": null,
+    "model": "qwen3-32b",
+    "workers": 80,
+    "programs_in_tape": 80,
+    "programs_completed": 80,
+    "calls_total": 705,
+    "timeline": "reconstructed",
+    "wall_s_sampler": 5389.1,
+    "wall_s_calls": 4599.4,
+    "max_kv_perc": 100.0,
+    "t_warm_s": 40.1,
+    "t_drain_s": 4122.7,
+    "kv_peak_perc": 100.0,
+    "kv_avg_perc": 72.9,
+    "max_running": 80,
+    "avg_running": 11.3,
+    "max_waiting": 74,
+    "preemptions": 111,
+    "prefix_hit_rate": 0.4348,
+    "full": {
+      "window_s": 4599.4,
+      "t0_s": 0.0,
+      "t1_s": 4599.4,
+      "calls_started": 705,
+      "gen_tokens_in_window": 1333835.0,
+      "gen_tps": 290.0,
+      "prompt_tps": 2236.0,
+      "calls_per_s": 0.153,
+      "latency_s": {
+        "p50": 68.7,
+        "p90": 674.7,
+        "p95": 1258.3,
+        "p99": 1920.2
+      },
+      "latency_mean_s": 240.6,
+      "latency_max_s": 2201.1,
+      "wait_s": {
+        "p50": 6.9,
+        "p90": 604.6,
+        "p95": 987.9,
+        "p99": 1810.5
+      },
+      "decode_s": {
+        "p50": 48.9,
+        "p90": 225.5,
+        "p95": 364.4,
+        "p99": 404.3
+      }
+    },
+    "warm": {
+      "window_s": 4559.3,
+      "t0_s": 40.1,
+      "t1_s": 4599.4,
+      "calls_started": 622,
+      "gen_tokens_in_window": 1300979.9,
+      "gen_tps": 285.3,
+      "prompt_tps": 2201.8,
+      "calls_per_s": 0.136,
+      "latency_s": {
+        "p50": 68.6,
+        "p90": 778.6,
+        "p95": 1379.3,
+        "p99": 1989.2
+      },
+      "latency_mean_s": 259.0,
+      "latency_max_s": 2201.1,
+      "wait_s": {
+        "p50": 4.7,
+        "p90": 651.8,
+        "p95": 1217.2,
+        "p99": 1812.8
+      },
+      "decode_s": {
+        "p50": 47.7,
+        "p90": 232.4,
+        "p95": 364.3,
+        "p99": 405.2
+      }
+    },
+    "steady": {
+      "window_s": 4082.6,
+      "t0_s": 40.1,
+      "t1_s": 4122.7,
+      "calls_started": 601,
+      "gen_tokens_in_window": 1238670.1,
+      "gen_tps": 303.4,
+      "prompt_tps": 2302.4,
+      "calls_per_s": 0.147,
+      "latency_s": {
+        "p50": 70.3,
+        "p90": 797.5,
+        "p95": 1468.1,
+        "p99": 2007.3
+      },
+      "latency_mean_s": 265.8,
+      "latency_max_s": 2201.1,
+      "wait_s": {
+        "p50": 5.6,
+        "p90": 683.2,
+        "p95": 1283.1,
+        "p99": 1813.3
+      },
+      "decode_s": {
+        "p50": 48.1,
+        "p90": 313.3,
+        "p95": 364.4,
+        "p99": 405.4
+      }
+    }
+  }
+]
