@@ -1,4 +1,0 @@
-instance: psf__requests-1766 (psf/requests 2.0)
-result: turns=0 submitted=False status=NO_PATCH patch_len=0
-error: model call failed at turn 1: Connection error.
-================================================================================
