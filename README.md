@@ -71,12 +71,21 @@ upcoming decode. Output lands in `result/29_AB_coder_size_vs_hazard/`:
 
 Budget ~40 min per replicate on the coder preset.
 
-To re-derive every number and figure from runs already in `result/` without a GPU:
+### What a fresh clone can and cannot recompute
+
+Each run folder ships `results_<arm>.jsonl`, `results_<arm>_summary.json`,
+`kv_<arm>.csv`, `steady_metrics.json`/`.csv` and the figures. The cross-run
+rollup and its figure regenerate from those, no GPU needed:
 
 ```bash
-python3 algorithm/warmup_metrics.py --out result/33_warmup_steady_metrics result/2[1-8]*
-python3 algorithm/plot_warmup_metrics.py
+python3 algorithm/plot_warmup_metrics.py     # -> result/33_warmup_steady_metrics/
 ```
+
+`algorithm/warmup_metrics.py` cannot be re-run against the committed runs,
+because it reads `tape_<arm>.jsonl` and those are excluded (60 MB per arm). The
+`steady_metrics.*` it produced are committed, so the numbers are auditable; to
+recompute them from raw calls you have to run the experiment yourself, which
+writes a fresh tape.
 
 ## Metrics
 
