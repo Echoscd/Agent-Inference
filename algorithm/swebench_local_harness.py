@@ -27,7 +27,7 @@ from swebench.harness.grading import get_logs_eval, get_eval_tests_report, get_r
 from swebench.harness.constants import FAIL_TO_PASS, PASS_TO_PASS
 import paths
 
-CONDA_PATH = "/root/miniconda3"
+CONDA_PATH = paths.conda_root()   # auto-detected; AGENT_EXP_CONDA overrides
 WORK_ROOT  = paths.WORK_ROOT
 
 

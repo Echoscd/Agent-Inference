@@ -46,6 +46,29 @@ scripts/fetch_data.sh          # downloads SWE-bench Verified into data/
 Hardware: the reported runs used one 140 GB GPU (sm_90). 80-way concurrency at
 40960 context needs a large KV pool; smaller cards work with fewer workers.
 
+### What gets downloaded
+
+The repo is ~21 MB. Everything heavy is fetched or built on the target machine:
+
+| what | size | how |
+|---|---|---|
+| pip deps (torch, vLLM, CUDA libs) | ~16 GB | `pip install -r requirements.txt` |
+| model weights, coder preset (`Qwen3-Coder-30B-A3B-Instruct`) | ~57 GB | HuggingFace, on first server start |
+| model weights, reasoning preset (`Qwen3-32B`) | ~62 GB | only if you run that preset |
+| SWE-bench Verified | ~8 MB | `scripts/fetch_data.sh` |
+| 80 testbeds: repo clones + per-instance conda envs | ~9 GB + ~12 GB | `python3 algorithm/prebuild96.py` |
+
+So budget roughly **90 GB of disk for one preset** (140 GB for both), plus a
+conda install — SWE-bench's setup scripts need one, and the harness rewrites
+their Docker paths to it. It is auto-detected; `AGENT_EXP_CONDA` overrides.
+
+Build the testbeds before the first run, not during it: a build takes minutes
+and would otherwise be measured as serving time.
+
+```bash
+python3 algorithm/prebuild96.py            # builds the 80 instances in data/ids80.txt
+```
+
 ## Reproduce an A/B
 
 One replicate of the headline comparison (arm A = `size` baseline, arm B =

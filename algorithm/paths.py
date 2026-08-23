@@ -25,6 +25,33 @@ HUMANEVAL_DATA = os.path.join(DATA_DIR, "humaneval.jsonl")
 IDS80 = os.path.join(DATA_DIR, "ids80.txt")
 
 
+def conda_root():
+    """Base of the conda install used to build SWE-bench testbeds.
+
+    SWE-bench's setup scripts assume the Docker image layout (/opt/miniconda3);
+    the harness rewrites that to whatever conda is actually present here. Set
+    AGENT_EXP_CONDA to pin it, otherwise the usual install locations are probed
+    and finally `conda info --base` is asked.
+    """
+    env = os.environ.get("AGENT_EXP_CONDA")
+    if env:
+        return env
+    for c in ("/root/miniconda3", "/opt/miniconda3", "/opt/conda",
+              os.path.expanduser("~/miniconda3"), os.path.expanduser("~/anaconda3")):
+        if os.path.isdir(os.path.join(c, "bin")):
+            return c
+    base = os.environ.get("CONDA_PREFIX_1") or os.environ.get("CONDA_PREFIX")
+    if base:
+        return base
+    import shutil
+    exe = shutil.which("conda")
+    if exe:
+        return os.path.dirname(os.path.dirname(os.path.realpath(exe)))
+    raise RuntimeError(
+        "no conda install found -- SWE-bench testbeds need one. "
+        "Install miniconda or set AGENT_EXP_CONDA=/path/to/conda")
+
+
 def result(*parts):
     """Path inside result/, creating the parent experiment folder."""
     p = os.path.join(RESULT_DIR, *parts)
