@@ -1,113 +1,102 @@
 # algorithm/
 
-Workspace for integrating program-aware KV scheduling (ThunderAgent-style external
-scheduling + the bayes_dual_price value-aware admission from
-`final_agentic_serving_project`) into the SWE-bench serving experiments.
+The experiment harness: the agent, the concurrent driver, the metric layer and
+the figures. The scheduling policies themselves live in `../ThunderAgent/`.
 
-## reproduce_run13.sh
+Nothing here hardcodes a machine path — `paths.py` resolves everything from the
+repo root, overridable with `AGENT_EXP_ROOT`, `AGENT_EXP_RESULT`,
+`AGENT_EXP_WORK_ROOT`, `AGENT_EXP_DATA`, `AGENT_EXP_CONDA`.
 
-Self-contained driver that reproduces `result/13_thunderagent_full80_trace` — the
-80-way SWE-bench edit-agent run served through ThunderAgent on a local vLLM 0.12
-backend, with per-program per-turn traces + KV/preempt time series + the standard
-prefill/decode/turn figure.
+## The pipeline
 
-```bash
-bash algorithm/reproduce_run13.sh              # exact run-13 config (80 workers, 20 turns)
-bash algorithm/reproduce_run13.sh 48 12 my_run # 48 workers, 12 turns, -> result/my_run/
+```
+run_swebench_eval.py            N concurrent agents, one thread each
+  └─ swebench_edit_agent.py     the agent loop: Reasoning + OPEN/RUN/EDIT/SUBMIT
+       ├─ X-Session-ID: <program_id>   so the proxy can track a program
+       ├─ X-Decode-Len: <n>            arm B only, the known decode from arm A's tape
+       └─ ab_tape.py             records every call (prompt, completion, timing)
+  └─ swebench_local_harness.py  conda testbeds, patch application, grading
+  └─ metrics.py                 samples vLLM /metrics every 0.5 s
+         ↓
+ThunderAgent proxy :8300  (policy decides who holds KV)
+         ↓
+vLLM 0.12.0 backend :8000  (prefix caching on, 40960 context)
 ```
 
-Pipeline: agents (`run_swebench_eval.py`, edit agent, `X-Session-ID`=program_id)
-→ ThunderAgent proxy `:8300` (router=tr, tool-boundary pause/resume, active KV ≤ GPU
-capacity, profiling) → vLLM 0.12 backend `:8000` (Qwen3-32B, 40960 ctx, prefix
-caching, no CPU offload, flashinfer sampler off).
+## Entry points
 
-## run_density.sh
+| script | what it does |
+|---|---|
+| `run_AB_experiment.sh` | one A/B: cold vLLM + arm A, cold vLLM + arm B, then verify, plot, and emit steady metrics |
+| `run_swebench_eval.py` | the driver on its own: `--workers --max-turns --agent edit --model <served-name>` |
+| `prebuild96.py` | build the conda testbeds up front (do this before any timing run) |
+| `serve_dev_vllm.sh` | start just the backend |
+| `warmup_metrics.py` | post-warmup / steady-state metrics for finished runs |
+| `plots.py` | `pdt \| saturation \| kvlog \| compare \| gantt \| concurrency \| conckv` |
+| `diagnose_agent.py` | run one instance, save the full transcript |
+| `concurrency_bench.py` | synthetic fixed-prompt stress, no agent involved |
+| `cache_ab_experiment.py` | prefix-cache reuse vs drop on one trajectory |
 
-Same pipeline, but launches ThunderAgent with the **current_density** scheduling
-policy (`--policy density`): admit/keep the highest value-density
-`v = 1/(tau·footprint)` first, evict the lowest. `tau = alpha·footprint + decode_hat`,
-`footprint = total_tokens`; `alpha` is offline-fixed from historical prefill/decode
-(~0.03), `decode_hat` is the assumed-known decode tokens/turn. Doubles as the A/B
-driver (pass `size` to get the baseline).
+`../scripts/run_replicates.sh` wraps `run_AB_experiment.sh` for repeated runs.
 
-```bash
-bash algorithm/run_density.sh                       # 80-way density -> result/14_density80/
-bash algorithm/run_density.sh 80 20 14_size80 size  # size baseline for A/B
-bash algorithm/run_density.sh 80 20 my 14d density 0.03 1000   # explicit alpha/decode_hat
-```
+## The A/B design
 
-The density policy lives in ThunderAgent: `config.py` (policy/alpha/decode_hat),
-`scheduler/router.py` (`_program_density`, density branches in `_greedy_resume`
-admission and `_pause_until_safe` eviction). Default `--policy size` keeps old behavior.
+Arm A is the baseline policy (`size` by default), arm B the policy under test.
+Both run the real agent at temperature 0 on the same 80 instances, and vLLM is
+restarted before each arm so both start with an empty KV and prefix cache. Arm A
+records `tape_A.jsonl`; arm B reads it and sends each call's **known** decode
+length as `X-Decode-Len`, which is what lets a value-based policy score a program
+by the decode it is about to do rather than by a guess.
 
-## run_AB_experiment.sh  (record-and-reproduce A/B)
+Temperature 0 was meant to make the two arms reproduce turn for turn. It does
+not, quite: vLLM batch variance makes them diverge, and the harness prints the
+drift at the end of every run. Treat the A/B as two samples of the same workload
+distribution, not as a paired comparison.
 
-Compares two scheduling policies on the **identical** SWE-bench workload:
+Each arm has a wall-clock limit (7th arg). On hit the arm stops, keeps its
+partial results, and the experiment moves on — same limit on both arms, so it
+doubles as a fixed time budget per arm.
 
-- **Pass A** (baseline): real edit-agent through ThunderAgent, `policy=size`, **temp=0**.
-  Records `tape_A.jsonl` — every LLM call's full prefill (messages) + decode
-  (completion) + decode length.
-- **Pass B** (algorithm): real edit-agent, `policy=density` (or future), temp=0. Reads
-  `tape_A` and sends `X-Decode-Len` per call so the density policy scores by the
-  **known** decode length; records `tape_B.jsonl`.
+## Metrics
 
-Both passes run the real agent at temperature 0 → the trajectory reproduces
-turn-for-turn, so pass B's decode equals pass A's (verified by diffing tape_A vs
-tape_B at the end). The vLLM backend is restarted before each pass (cold KV). The
-only difference between arms is the ThunderAgent policy.
+**`run_metrics.py` is the single source of truth.** One percentile formula, one
+tape parser, one warmup rule, one throughput attribution. `run_swebench_eval.py`,
+`plots.py`, `concurrency_bench.py` and `warmup_metrics.py` all delegate to it.
+`test_run_metrics.py` pins the semantics.
 
-Each pass has a wall-clock **time limit** (7th arg, default 1800s). On hit, the agent
-run is stopped, its partial `results`+`_summary.json` are kept (results.jsonl is
-flushed per-agent; `run_swebench_eval` catches SIGTERM and writes the summary from
-finished agents), and the experiment moves on (A done → B). Same limit on both passes =
-a fixed time budget per arm (clean goodput comparison: who completes more in the same T).
+- `RunArtifacts(run_dir, arm)` — `.calls`, `.kv`, `.programs`, `.windows()`
+- `Window(name, t0, t1)` — `.gen_tokens()` overlap-weighted, `.metrics()`
+- `RunMetrics` — nested dict for json, flat row for csv
+- `pctl` / `dist` — the only percentile implementation
 
-```bash
-bash algorithm/run_AB_experiment.sh                       # 80-way, B=density, 1800s/pass -> result/15_AB_density/
-bash algorithm/run_AB_experiment.sh 48 12 my density 0.03 1000 900   # 48 workers, 12 turns, 900s/pass
-```
+Statistics come from the **tape**, not `results.jsonl`: the tape is written as
+each call happens, so it covers programs that never returned. `results.jsonl`
+only has finishers, which biases toward the easy instances.
 
-Mechanism files: `ab_tape.py` (env-gated record / known-decode lookup; `AB_RECORD_TAPE`,
-`AB_KNOWN_DECODE_TAPE`), `swebench_edit_agent._stream_call` (records each call, injects
-`X-Decode-Len`), ThunderAgent `app.get_known_decode` + `Program.known_decode` +
-`_program_density` (uses known decode when present, else `decode_hat`).
-Outputs per arm: `results_{A,B}.jsonl` (+_summary.json), `kv_{A,B}.csv`,
-`tape_{A,B}.jsonl`, `pdt_{A,B}.png`, `kv_compare.png`.
+Two latency notions, deliberately different: per-program (`ttft + decode +
+tool_wait`, tool time included) in `results_*_summary.json`, and per-LLM-call
+(`wait + decode`, tool time excluded) in `steady_metrics.*`. `wait` is TTFT and
+bundles proxy pause, server queue and prefill — not separable from the client.
 
-All pipeline code now lives in `algorithm/`. Big external artifacts stay in `../`:
-`vllm_dev/` (editable vLLM 0.12), `ThunderAgent/` (proxy), `data/`, `swebench_runs/`
-(built testbeds), `result/`, `ids80.txt`.
+## Files
 
-Core pipeline:
-- `swebench_local_harness.py` — Docker-free conda grading harness (`Instance`:
-  build/apply_patch/evaluate/reset; `--patch gold` validates an instance).
-- `swebench_agent.py` — shared dataclasses (TurnTiming/AgentResult) + config +
-  the bash-style ReAct agent (one bash command/turn; the `--agent bash` baseline).
-- `swebench_edit_agent.py` — the edit-style ReAct agent used in all experiments
-  (Reasoning + OPEN/EDIT/RUN/SUBMIT; program_id via X-Session-ID, release on done).
-- `run_swebench_eval.py` — concurrent runner; `--agent bash|edit`; writes per-turn
-  `trace` (results.jsonl) + aggregate `*_summary.json`.
+- `paths.py` — repo-relative paths, conda auto-detection
+- `run_metrics.py` / `test_run_metrics.py` — metric definitions and their tests
+- `swebench_agent.py` — shared dataclasses (`TurnTiming`, `AgentResult`), config,
+  and the bash-style ReAct agent (`--agent bash`, not used by the reported runs)
+- `swebench_edit_agent.py` — the edit agent used in every reported experiment
+- `swebench_local_harness.py` — Docker-free conda harness: build, apply patch,
+  evaluate, reset. `--patch gold` validates an instance.
+- `metrics.py` — vLLM `/metrics`: in-process `MetricsMonitor` plus a standalone
+  sampler (`python3 metrics.py <out.csv> [url] [interval]`)
+- `ab_tape.py` — the tape: env-gated recording (`AB_RECORD_TAPE`) and
+  known-decode lookup (`AB_KNOWN_DECODE_TAPE`)
+- `legacy/` — superseded HumanEval pipeline, kept for reference only
 
-Tooling (consolidated):
-- `metrics.py` — vLLM /metrics: in-process `MetricsMonitor` (imported by the runner)
-  AND a standalone time-series sampler (`python metrics.py <out.csv> [url] [interval]`).
-  Replaces the old metrics_monitor.py + kv_sampler.py.
-- `plots.py` — one CLI for all figures: `pdt | saturation | kvlog | compare | gantt`.
-  Replaces plot_pdt/plot_saturation/plot_kv/plot_compare/make_results.
+## History
 
-Utilities / experiments:
-- `prebuild96.py` — parallel pre-build of testbeds. `diagnose_agent.py` — run one
-  instance + save transcript. `cache_ab_experiment.py` — prefix-cache A/B.
-  `concurrency_bench.py` — synthetic fixed-prompt concurrency stress.
-- `serve_dev_vllm.sh` — start the vLLM 0.12 backend from `../vllm_dev`.
-- `legacy/` — superseded HumanEval pipeline (react_pipeline.py, run_eval.py).
-
-Outputs in `result/<tag>/`: results.jsonl (per-program trace), kv_timeseries.csv,
-ta_profiles/step_profiles.csv (per-step prefill_s/decode_s/pause_s/tool_call_s),
-vllm_backend.log, thunderagent.log, run.log, pdt.png.
-
-## Next step
-Replace ThunderAgent's greedy `_greedy_resume` (size/capacity bin-pack) with the
-`bayes_dual_price` value-density ordering (Δrun/q_i) to test whether value-aware
-admission beats greedy. vLLM's LRU eviction (`vllm_dev/.../kv_cache_utils.py`
-FreeKVCacheBlockQueue) is the later HOLD/EVICT target.
+The scheduling code was refactored out of the router into policy classes
+(`ThunderAgent/ThunderAgent/scheduling/`), and the metric code was unified into
+`run_metrics.py`. Earlier revisions of this file described `_program_density` and
+"density branches in `_greedy_resume`" inside `router.py`; those no longer exist —
+the router is pure orchestration and delegates to `self.policy`.

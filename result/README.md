@@ -43,3 +43,52 @@ Each subfolder = one experiment. Figures (.png) + tables (.csv) live inside.
   ceiling, so it cannot fix thrashing. Offload's net win needs MODERATE
   oversubscription (~48-way) where GPU alone overflows but GPU+CPU fits.
   vLLM 0.23 (latest) needs CUDA-13 driver; host is 12.8 -> 0.12.0 is newest runnable.
+
+## Scheduling experiments (11 onward)
+
+From here the question changes from "how does the server behave under
+oversubscription" to "which program should hold KV". Every run from 15 on is an
+A/B: arm A a baseline policy, arm B the policy under test, same 80 instances,
+vLLM restarted cold before each arm.
+
+- **11_thunderagent_80way/**, **11b_direct_baseline/**, **12_thunderagent_vs_direct/** —
+  first ThunderAgent runs: 80-way through the proxy vs straight at vLLM. Establishes
+  that proxy-side pause/resume changes the KV picture at all.
+- **13_thunderagent_full80_trace/** — the reference 80-way traced run (per-program
+  per-turn trace + KV/preempt time series). `algorithm/reproduce_run13.sh` rebuilds it.
+- **14_thunder_evict/** — first eviction experiment.
+- **15_AB_density/**, **16_AB_density/** — first A/B harness runs. Both aborted early
+  (15: 6 and 17 of 80 programs completed; 16: no summary), so they are process
+  artifacts, not results.
+- **17_AB_density/**, **18_AB_fidelity_dd/** — **INVALID, do not cite.** A config-wiring
+  bug built the router before the config was applied, so both arms silently ran the
+  default `size` policy regardless of `--policy`. The bug is fixed; these were never
+  re-run.
+- **19_AB_fidelity_vs_size/** — aborted, 0 of 80 programs completed in either arm.
+- **20_dual_price_check/** — sanity check that the dual-descent price actually rises
+  under oversubscription.
+- **21_AB_size_vs_fidelity/**, **22_AB_size_vs_fidelity/** — size vs fidelity on
+  Qwen3-32B, 80/80 completed. 22 is the one with the policy recorded in the decision
+  trace; fidelity's tail latency is much worse (p95 +140% post-warmup).
+- **23_AB_coder_size_vs_fidelity/** — same comparison on Qwen3-Coder-30B. Both arms
+  hit the time limit (62 and 57 of 80 completed).
+- **24_AB_size_vs_hazard/**, **25_AB_size_vs_hazard/** — size vs hazard_grade on
+  Qwen3-32B. 25's arm B aborted, so only 24 is a usable pair.
+- **26/27/28_AB_coder_size_vs_hazard/** — the headline comparison: size vs
+  hazard_grade on Qwen3-Coder-30B, three replicates, 80/80 completed in every arm.
+  Resolve favours hazard_grade in all three (14/11, 16/12, 14/11); throughput and
+  tail-latency deltas are **not** significant at n=3 and change sign between
+  replicates. Same config in all three (`scripts/run_replicates.sh coder <n> 1`).
+- **33_warmup_steady_metrics/** — cross-run rollup, not a run: post-warmup and
+  steady-state throughput and p90/p95 for every arm above. See its own README.
+
+### Reading these folders
+
+`results_<arm>_summary.json` is whole-run (includes the cold ramp and the drain
+tail). `steady_metrics.json` splits the timeline into full / post-warmup / steady.
+`kv_<arm>.csv` is the 0.5 s server sampling. Raw `tape_<arm>.jsonl` and
+`decision_trace_<arm>.jsonl` are not committed — see the top-level README.
+
+Runs before 22 have no `policy` field in their decision trace, and runs before
+2026-08-23 have no absolute timestamps in their tape (the timeline is
+reconstructed; each `steady_metrics` row says which applied).
