@@ -1,0 +1,27 @@
+{
+  "experiment": "04_concurrency32_cache",
+  "agent": {
+    "completed": 32,
+    "turns": {
+      "min": 2,
+      "median": 5,
+      "max": 50,
+      "mean": 11.2
+    },
+    "decode_length_tok": {
+      "min": 1273,
+      "median": 7901,
+      "max": 57972,
+      "mean": 16623.6
+    },
+    "prompt_tokens": {
+      "min": 5081,
+      "median": 36339,
+      "max": 1230048,
+      "mean": 210460.8
+    },
+    "resolved": 2,
+    "total_gen": 531954,
+    "total_prompt": 6734745
+  }
+}

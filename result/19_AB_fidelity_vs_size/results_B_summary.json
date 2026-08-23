@@ -1,0 +1,62 @@
+{
+  "config": {
+    "agent": "edit",
+    "model": "qwen3-32b",
+    "workers": 80,
+    "max_turns": 20,
+    "prefix_caching": null,
+    "completed": 0
+  },
+  "quality": {
+    "resolved": 0,
+    "resolve_rate": 0,
+    "submitted": 0,
+    "produced_patch": 0,
+    "errored": 0
+  },
+  "agent": {
+    "turns": {
+      "min": 0,
+      "median": 0,
+      "mean": 0,
+      "max": 0
+    },
+    "decode_length_tok": {
+      "min": 0,
+      "median": 0,
+      "mean": 0,
+      "max": 0
+    },
+    "prompt_tokens": {
+      "min": 0,
+      "median": 0,
+      "mean": 0,
+      "max": 0
+    },
+    "avg_decode_s": 0,
+    "total_gen_tokens": 0,
+    "total_prompt_tokens": 0
+  },
+  "throughput": {
+    "wall_s": 598.5,
+    "aggregate_gen_tps": 0.0,
+    "aggregate_prompt_tps": 0.0,
+    "server_gen_tps": 242.7,
+    "server_prompt_tps": 554.6
+  },
+  "kv_cache": {
+    "peak_perc": 99.9,
+    "avg_perc": 17.9
+  },
+  "prefix_cache": {
+    "hit_rate": 0.0989,
+    "queries_tok": 1150171,
+    "hits_tok": 113696
+  },
+  "concurrency": {
+    "max_running": 80,
+    "avg_running": 11.0,
+    "max_waiting": 68
+  },
+  "preemptions": 4
+}

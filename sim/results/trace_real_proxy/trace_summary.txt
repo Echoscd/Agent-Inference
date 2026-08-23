@@ -1,0 +1,40 @@
+Paired scheduler trace summary
+==============================
+
+thunder_greedy
+--------------
+t=0 admitted request IDs: 49;4;41;42;26;54;68;33;38;34;61;45;17;72;27;74;9;60;6;8;58;65;77;24;48;46;10;43;21;16;29;52;13;32;57
+t=0 evicted request IDs: (none)
+mean CT=9494.880s, makespan=18264.918s, cache hit=0.1400
+first scheduler decisions:
+  t=   0.000 active= 0 ready=80 admit=[49;4;41;42;26;54;68;33;38;34;61;45;17;72;27;74;9;60;6;8;58;65;77;24;48;46;10;43;21;16;29;52;13;32;57] evict=[]
+  t=   5.000 active=35 ready=45 admit=[] evict=[]
+  t=  10.000 active=35 ready=45 admit=[] evict=[]
+  t=  15.000 active=35 ready=45 admit=[] evict=[]
+  t=  20.000 active=35 ready=45 admit=[] evict=[]
+  t=  25.000 active=35 ready=45 admit=[] evict=[]
+  t=  30.000 active=35 ready=45 admit=[] evict=[]
+  t=  35.000 active=35 ready=45 admit=[] evict=[]
+  t=  40.000 active=35 ready=45 admit=[] evict=[]
+  t=  45.000 active=35 ready=45 admit=[] evict=[]
+  t=  50.000 active=34 ready=46 admit=[49] evict=[]
+  t=  55.000 active=35 ready=45 admit=[] evict=[]
+
+hazard_grade_knapsack
+---------------------
+t=0 admitted request IDs: 49;4;41;42;26;54;68;33;38;34;61;45;17;72;27;74;9;60;6;8;58;65;77;24;48;46;10;43;21;16;29;52;13;32;57
+t=0 evicted request IDs: (none)
+mean CT=7572.822s, makespan=15469.947s, cache hit=0.3405
+first scheduler decisions:
+  t=   0.000 active= 0 ready=80 admit=[49;4;41;42;26;54;68;33;38;34;61;45;17;72;27;74;9;60;6;8;58;65;77;24;48;46;10;43;21;16;29;52;13;32;57] evict=[]
+  t=   5.000 active=35 ready=45 admit=[] evict=[]
+  t=  10.000 active=35 ready=45 admit=[] evict=[]
+  t=  15.000 active=35 ready=45 admit=[] evict=[]
+  t=  20.000 active=35 ready=45 admit=[] evict=[]
+  t=  25.000 active=35 ready=45 admit=[] evict=[]
+  t=  30.000 active=35 ready=45 admit=[] evict=[]
+  t=  35.000 active=35 ready=45 admit=[] evict=[]
+  t=  40.000 active=35 ready=45 admit=[] evict=[]
+  t=  45.000 active=35 ready=45 admit=[] evict=[]
+  t=  50.000 active=34 ready=46 admit=[49] evict=[]
+  t=  55.000 active=35 ready=45 admit=[] evict=[]

@@ -1,0 +1,103 @@
+{
+  "config": {
+    "agent": "edit",
+    "model": "qwen3-coder-30b",
+    "workers": 80,
+    "max_turns": 20,
+    "prefix_caching": null,
+    "completed": 62
+  },
+  "quality": {
+    "resolved": 14,
+    "resolve_rate": 0.2258,
+    "submitted": 16,
+    "produced_patch": 29,
+    "errored": 20
+  },
+  "agent": {
+    "turns": {
+      "min": 4,
+      "median": 18.0,
+      "p90": 20.0,
+      "p99": 20.0,
+      "mean": 16.0,
+      "max": 20
+    },
+    "decode_length_tok": {
+      "min": 284,
+      "median": 2717.0,
+      "p90": 8255.2,
+      "p99": 9412.2,
+      "mean": 3513.0,
+      "max": 9694
+    },
+    "prompt_tokens": {
+      "min": 54776,
+      "median": 227095.5,
+      "p90": 427597.7,
+      "p99": 510297.0,
+      "mean": 253622.6,
+      "max": 519591
+    },
+    "avg_decode_s": 231.7,
+    "latency_s": {
+      "min": 35.5,
+      "median": 313.8,
+      "p90": 555.7,
+      "p99": 586.1,
+      "mean": 323.1,
+      "max": 588.5
+    },
+    "average_latency_s": 323.1,
+    "p90_latency_s": 555.7,
+    "p99_latency_s": 586.1,
+    "decode_s": {
+      "min": 26.7,
+      "median": 190.2,
+      "p90": 490.4,
+      "p99": 562.8,
+      "mean": 231.7,
+      "max": 573.1
+    },
+    "ttft_s": {
+      "min": 6.4,
+      "median": 27.9,
+      "p90": 226.0,
+      "p99": 352.0,
+      "mean": 78.0,
+      "max": 365.1
+    },
+    "tool_wait_s": {
+      "min": 0.0,
+      "median": 11.5,
+      "p90": 27.5,
+      "p99": 39.7,
+      "mean": 13.4,
+      "max": 42.7
+    },
+    "total_gen_tokens": 217806,
+    "total_prompt_tokens": 15724603
+  },
+  "throughput": {
+    "wall_s": 598.5,
+    "aggregate_gen_tps": 363.9,
+    "aggregate_prompt_tps": 26274.5,
+    "server_gen_tps": 638.3,
+    "server_prompt_tps": 31028.1
+  },
+  "kv_cache": {
+    "peak_perc": 99.9,
+    "avg_perc": 83.9
+  },
+  "prefix_cache": {
+    "hit_rate": 0.7984,
+    "queries_tok": 19543076,
+    "hits_tok": 15603776
+  },
+  "concurrency": {
+    "max_running": 80,
+    "avg_running": 40.4,
+    "max_waiting": 68
+  },
+  "preemptions": 2
+}

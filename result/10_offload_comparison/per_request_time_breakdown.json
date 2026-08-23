@@ -1,0 +1,21 @@
+{
+  "run": "09_concurrency80_v012_offload (80-way, vLLM 0.12 + CPU offload)",
+  "scope": "per LLM request (= one agent turn); from vLLM request_*_time_seconds histograms",
+  "completed_requests": 418,
+  "avg_seconds": {
+    "queue": 98.0,
+    "prefill": 2.0,
+    "decode": 69.3,
+    "inference_prefill_plus_decode": 71.3
+  },
+  "lifetime_fraction": {
+    "queue_pct": 57.9,
+    "prefill_pct": 1.2,
+    "decode_pct": 40.9
+  },
+  "contrast": {
+    "low_concurrency_decode_pct": "~97-100% (no queue)",
+    "at_80way_decode_pct": "~41% (queue-bound)"
+  },
+  "takeaway": "Oversubscription turns a decode-bound workload into queue-bound: a request spends ~58% of its life waiting for a GPU slot (queue/preemption), only ~41% actually decoding. prefill is ~1%."
+}

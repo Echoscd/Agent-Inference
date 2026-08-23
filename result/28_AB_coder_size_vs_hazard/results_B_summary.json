@@ -1,0 +1,111 @@
+{
+  "config": {
+    "agent": "edit",
+    "model": "qwen3-coder-30b",
+    "workers": 80,
+    "max_turns": 20,
+    "prefix_caching": null,
+    "completed": 80
+  },
+  "quality": {
+    "resolved": 14,
+    "resolve_rate": 0.175,
+    "submitted": 18,
+    "produced_patch": 32,
+    "errored": 34
+  },
+  "agent": {
+    "turns": {
+      "min": 3,
+      "median": 17.5,
+      "p90": 20.0,
+      "p95": 20.0,
+      "p99": 20.0,
+      "mean": 15.1,
+      "max": 20
+    },
+    "decode_length_tok": {
+      "min": 416,
+      "median": 3734.5,
+      "p90": 13489.6,
+      "p95": 16549.0,
+      "p99": 18806.5,
+      "mean": 5619.1,
+      "max": 25644
+    },
+    "prompt_tokens": {
+      "min": 30747,
+      "median": 226704.0,
+      "p90": 399658.3,
+      "p95": 430920.0,
+      "p99": 498222.1,
+      "mean": 239491.6,
+      "max": 519037
+    },
+    "avg_decode_s": 322.3,
+    "latency_s": {
+      "min": 45.1,
+      "median": 417.2,
+      "p90": 754.7,
+      "p95": 849.6,
+      "p99": 865.1,
+      "mean": 433.5,
+      "max": 907.7
+    },
+    "average_latency_s": 433.5,
+    "p90_latency_s": 754.7,
+    "p95_latency_s": 849.6,
+    "p99_latency_s": 865.1,
+    "decode_s": {
+      "min": 34.5,
+      "median": 242.9,
+      "p90": 713.1,
+      "p95": 832.9,
+      "p99": 853.4,
+      "mean": 322.3,
+      "max": 896.0
+    },
+    "ttft_s": {
+      "min": 6.4,
+      "median": 30.9,
+      "p90": 279.8,
+      "p95": 321.6,
+      "p99": 366.1,
+      "mean": 96.1,
+      "max": 450.5
+    },
+    "tool_wait_s": {
+      "min": 0.0,
+      "median": 12.5,
+      "p90": 26.5,
+      "p95": 43.6,
+      "p99": 95.0,
+      "mean": 15.2,
+      "max": 132.9
+    },
+    "total_gen_tokens": 449525,
+    "total_prompt_tokens": 19159326
+  },
+  "throughput": {
+    "wall_s": 908.1,
+    "aggregate_gen_tps": 495.0,
+    "aggregate_prompt_tps": 21099.3,
+    "server_gen_tps": 495.0,
+    "server_prompt_tps": 21099.3
+  },
+  "kv_cache": {
+    "peak_perc": 99.9,
+    "avg_perc": 65.8
+  },
+  "prefix_cache": {
+    "hit_rate": 0.7932,
+    "queries_tok": 20561551,
+    "hits_tok": 16309680
+  },
+  "concurrency": {
+    "max_running": 80,
+    "avg_running": 28.6,
+    "max_waiting": 62
+  },
+  "preemptions": 6
+}

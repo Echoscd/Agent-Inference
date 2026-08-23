@@ -1,0 +1,62 @@
+{
+  "config": {
+    "agent": "edit",
+    "model": "qwen3-32b",
+    "workers": 80,
+    "max_turns": 20,
+    "prefix_caching": null,
+    "completed": 80
+  },
+  "quality": {
+    "resolved": 14,
+    "resolve_rate": 0.175,
+    "submitted": 47,
+    "produced_patch": 56,
+    "errored": 18
+  },
+  "agent": {
+    "turns": {
+      "min": 3,
+      "median": 6,
+      "max": 20,
+      "mean": 8.8
+    },
+    "decode_length_tok": {
+      "min": 1642,
+      "median": 10633,
+      "max": 41839,
+      "mean": 14471.8
+    },
+    "prompt_tokens": {
+      "min": 9210,
+      "median": 75225,
+      "max": 470599,
+      "mean": 120362.4
+    },
+    "avg_decode_s": 719.4,
+    "total_gen_tokens": 1157740,
+    "total_prompt_tokens": 9628988
+  },
+  "throughput": {
+    "wall_s": 3990.6,
+    "aggregate_gen_tps": 290.1,
+    "aggregate_prompt_tps": 2412.9,
+    "server_gen_tps": 290.1,
+    "server_prompt_tps": 2412.9
+  },
+  "kv_cache": {
+    "peak_perc": 100.0,
+    "avg_perc": 89.3
+  },
+  "prefix_cache": {
+    "hit_rate": 0.3549,
+    "queries_tok": 254371087,
+    "hits_tok": 90263600
+  },
+  "concurrency": {
+    "max_running": 80,
+    "avg_running": 14.5,
+    "max_waiting": 67
+  },
+  "preemptions": 177
+}

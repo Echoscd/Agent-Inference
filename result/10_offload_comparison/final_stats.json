@@ -1,0 +1,52 @@
+{
+  "06_0.11_no_offload": {
+    "dur_s": 1446,
+    "kv_peak": 100.0,
+    "kv_avg": 95.3,
+    "run_max": 80,
+    "run_avg": 28.5,
+    "wait_max": 54,
+    "preemptions": 153,
+    "external_cpu_hit_pct": null,
+    "completed": 19,
+    "crashed": false,
+    "throughput_tps": {
+      "gen_peak": 1112,
+      "gen_median": 364,
+      "gen_mean": 447,
+      "prompt_peak": 11830,
+      "prompt_median": 838
+    }
+  },
+  "09_0.12_cpu_offload": {
+    "dur_s": 1052,
+    "kv_peak": 100.0,
+    "kv_avg": 96.2,
+    "run_max": 80,
+    "run_avg": 25.5,
+    "wait_max": 56,
+    "preemptions": 220,
+    "external_cpu_hit_pct": 29.9,
+    "completed": 16,
+    "crashed": false,
+    "throughput_tps": {
+      "gen_peak": 1743,
+      "gen_median": 401,
+      "gen_mean": 512,
+      "prompt_peak": 22300,
+      "prompt_median": 2671
+    }
+  },
+  "note": "0.11+offload crashed (AssertionError); 0.12+offload runs. Both 80-way thrash (GPU-bound active concurrency). Offload adds CPU tier (External hit) but cannot raise active-decode ceiling.",
+  "08_0.12_no_offload": {
+    "note": "short run (~216s, early phase only)",
+    "throughput_tps": {
+      "gen_peak": 1623,
+      "gen_median": 774,
+      "gen_mean": 794,
+      "prompt_peak": 10207,
+      "prompt_median": 2889
+    }
+  },
+  "throughput_note": "0.12 faster than 0.11 (version gain). offload pushes prompt-side peak to ~22k t/s (CPU DMA reload). gen median ~400 for both 06/09 at 80-way = GPU-bound active concurrency caps aggregate gen throughput regardless of offload."
+}

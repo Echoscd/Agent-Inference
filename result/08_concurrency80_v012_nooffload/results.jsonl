@@ -1,0 +1,1 @@
+{"instance_id": "pallets__flask-5014", "resolved": false, "status": "RESOLVED_NO", "turns": 3, "submitted": true, "gen_tokens": 1308, "prompt_tokens": 14029, "decode_s": 72.86542760767043, "ttft_s": 94.49986796453595, "tool_wait_s": 0.007945714518427849, "gen_tps": 17.950899939031018, "build_s": 0.0, "eval_s": 4.491664178669453, "error": null}

@@ -1,0 +1,14 @@
+{
+  "instance_id": "psf__requests-1766",
+  "repo": "psf/requests",
+  "version": "2.0",
+  "turns": 0,
+  "submitted": false,
+  "status": "NO_PATCH",
+  "resolved": false,
+  "gen_tokens": 0,
+  "prompt_tokens": 0,
+  "patch_len": 0,
+  "error": "model call failed at turn 1: Connection error.",
+  "turn_actions": []
+}

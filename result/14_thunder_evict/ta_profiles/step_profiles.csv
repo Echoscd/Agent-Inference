@@ -1,0 +1,3 @@
+program_id,step_id,prefill_s,decode_s,pause_s,tool_call_s,prompt_tokens,completion_tokens,cached_tokens,kv_hit_rate,completed_at
+EVICTTEST,1,0.0295,0.5615,0.0001,0.0,16,30,,,1782470764.4045
+EVICTTEST,2,0.0288,0.5594,0.0,1.0026,16,30,,,1782470765.9956

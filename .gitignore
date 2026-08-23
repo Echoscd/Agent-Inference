@@ -1,0 +1,43 @@
+# ── heavy experiment artifacts ────────────────────────────────────────────────
+# Raw A/B tapes: one file per arm, ~60 MB each (every LLM call's full prompt and
+# completion). Regenerate by running the experiment; summary stats derived from
+# them (steady_metrics.*, results_*_summary.json) ARE tracked.
+result/**/tape_*.jsonl
+result/**/decision_trace_*.jsonl
+result/**/backend_*.log
+result/**/ta_*.log
+result/**/run_*.log
+result/**/*.pptx
+
+# SWE-bench repo checkouts (8.8 GB) -- rebuilt by the harness on demand
+swebench_runs/
+
+# Vendored vLLM source tree (1.1 GB, stock 0.12.0 -- see README: install from pip)
+vllm_dev/
+
+# Benchmark data: downloaded, not vendored (see scripts/fetch_data.sh)
+data/*.jsonl
+
+# ── run logs / scratch ────────────────────────────────────────────────────────
+archive/
+*.log
+!result/**/COMPARISON.md
+
+# ── python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+.ipynb_checkpoints/
+
+# ── os / editor ───────────────────────────────────────────────────────────────
+.DS_Store
+._*
+.codex_tmp/
+*.zip
+
+# Simulator raw per-candidate dump: 191k rows / 27 MB, one row per scheduling
+# candidate evaluation. The derived files next to it (decision_events.csv,
+# scheduler_snapshots.csv, paired_decision_differences.csv, metrics.csv) are
+# tracked; regenerate this one with sim/code/trace_compare.py.
+sim/results/**/scheduler_candidates.csv

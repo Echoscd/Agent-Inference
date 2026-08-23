@@ -1,0 +1,210 @@
+[
+  {
+    "run": "26_AB_coder_size_vs_hazard",
+    "tag": "A",
+    "policy": "size",
+    "model": "qwen3-coder-30b",
+    "programs_in_tape": 80,
+    "programs_completed": 80,
+    "calls_total": 1167,
+    "wall_s_sampler": 1260.5,
+    "wall_s_reconstructed": 938.6,
+    "max_kv_perc": 99.99,
+    "t_warm_s": 32.9,
+    "t_drain_s": 488.1,
+    "full": {
+      "window_s": 938.6,
+      "t0_s": 0.0,
+      "t1_s": 938.6,
+      "calls_started": 1167,
+      "gen_tokens_in_window": 461499.0,
+      "gen_tps": 491.7,
+      "prompt_tps": 20485.7,
+      "calls_per_s": 1.243,
+      "latency_s": {
+        "p50": 8.8,
+        "p90": 52.5,
+        "p95": 97.2,
+        "p99": 398.8
+      },
+      "latency_mean_s": 28.6,
+      "latency_max_s": 519.7,
+      "wait_s": {
+        "p50": 0.4,
+        "p90": 4.7,
+        "p95": 6.8,
+        "p99": 220.1
+      },
+      "decode_s": {
+        "p50": 6.6,
+        "p90": 44.5,
+        "p95": 77.8,
+        "p99": 336.2
+      }
+    },
+    "warm": {
+      "window_s": 905.6,
+      "t0_s": 32.9,
+      "t1_s": 938.6,
+      "calls_started": 884,
+      "gen_tokens_in_window": 435811.1,
+      "gen_tps": 481.2,
+      "prompt_tps": 19149.3,
+      "calls_per_s": 0.976,
+      "latency_s": {
+        "p50": 8.6,
+        "p90": 53.3,
+        "p95": 96.6,
+        "p99": 332.1
+      },
+      "latency_mean_s": 27.2,
+      "latency_max_s": 519.7,
+      "wait_s": {
+        "p50": 0.3,
+        "p90": 3.0,
+        "p95": 10.7,
+        "p99": 254.8
+      },
+      "decode_s": {
+        "p50": 6.8,
+        "p90": 44.0,
+        "p95": 65.0,
+        "p99": 326.6
+      }
+    },
+    "steady": {
+      "window_s": 455.2,
+      "t0_s": 32.9,
+      "t1_s": 488.1,
+      "calls_started": 784,
+      "gen_tokens_in_window": 297202.7,
+      "gen_tps": 652.9,
+      "prompt_tps": 32610.5,
+      "calls_per_s": 1.722,
+      "latency_s": {
+        "p50": 8.6,
+        "p90": 50.3,
+        "p95": 91.8,
+        "p99": 336.7
+      },
+      "latency_mean_s": 26.0,
+      "latency_max_s": 519.7,
+      "wait_s": {
+        "p50": 0.4,
+        "p90": 3.2,
+        "p95": 15.1,
+        "p99": 263.8
+      },
+      "decode_s": {
+        "p50": 6.5,
+        "p90": 41.2,
+        "p95": 60.7,
+        "p99": 129.8
+      }
+    }
+  },
+  {
+    "run": "26_AB_coder_size_vs_hazard",
+    "tag": "B",
+    "policy": "hazard_grade",
+    "model": "qwen3-coder-30b",
+    "programs_in_tape": 80,
+    "programs_completed": 80,
+    "calls_total": 1221,
+    "wall_s_sampler": 1024.3,
+    "wall_s_reconstructed": 1017.9,
+    "max_kv_perc": 99.9,
+    "t_warm_s": 34.0,
+    "t_drain_s": 528.4,
+    "full": {
+      "window_s": 1017.9,
+      "t0_s": 0.0,
+      "t1_s": 1017.9,
+      "calls_started": 1221,
+      "gen_tokens_in_window": 439934.0,
+      "gen_tps": 432.2,
+      "prompt_tps": 19549.2,
+      "calls_per_s": 1.2,
+      "latency_s": {
+        "p50": 8.4,
+        "p90": 52.9,
+        "p95": 124.6,
+        "p99": 454.7
+      },
+      "latency_mean_s": 29.7,
+      "latency_max_s": 627.0,
+      "wait_s": {
+        "p50": 0.5,
+        "p90": 4.6,
+        "p95": 7.0,
+        "p99": 156.8
+      },
+      "decode_s": {
+        "p50": 6.7,
+        "p90": 40.9,
+        "p95": 77.1,
+        "p99": 436.8
+      }
+    },
+    "warm": {
+      "window_s": 983.9,
+      "t0_s": 34.0,
+      "t1_s": 1017.9,
+      "calls_started": 939,
+      "gen_tokens_in_window": 413715.8,
+      "gen_tps": 420.5,
+      "prompt_tps": 18347.9,
+      "calls_per_s": 0.954,
+      "latency_s": {
+        "p50": 8.4,
+        "p90": 55.1,
+        "p95": 127.2,
+        "p99": 326.9
+      },
+      "latency_mean_s": 27.9,
+      "latency_max_s": 592.6,
+      "wait_s": {
+        "p50": 0.5,
+        "p90": 3.1,
+        "p95": 9.5,
+        "p99": 176.6
+      },
+      "decode_s": {
+        "p50": 6.8,
+        "p90": 41.0,
+        "p95": 70.8,
+        "p99": 316.0
+      }
+    },
+    "steady": {
+      "window_s": 494.4,
+      "t0_s": 34.0,
+      "t1_s": 528.4,
+      "calls_started": 770,
+      "gen_tokens_in_window": 269484.4,
+      "gen_tps": 545.1,
+      "prompt_tps": 27401.0,
+      "calls_per_s": 1.557,
+      "latency_s": {
+        "p50": 8.8,
+        "p90": 61.0,
+        "p95": 128.8,
+        "p99": 345.0
+      },
+      "latency_mean_s": 28.4,
+      "latency_max_s": 592.6,
+      "wait_s": {
+        "p50": 0.5,
+        "p90": 3.6,
+        "p95": 23.8,
+        "p99": 215.3
+      },
+      "decode_s": {
+        "p50": 6.9,
+        "p90": 40.0,
+        "p95": 70.3,
+        "p99": 198.5
+      }
+    }
+  }
+]

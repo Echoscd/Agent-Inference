@@ -1,0 +1,97 @@
+{
+  "config": {
+    "agent": "edit",
+    "model": "qwen3-32b",
+    "workers": 80,
+    "max_turns": 20,
+    "prefix_caching": null,
+    "completed": 80
+  },
+  "quality": {
+    "resolved": 10,
+    "resolve_rate": 0.125,
+    "submitted": 52,
+    "produced_patch": 52,
+    "errored": 23
+  },
+  "agent": {
+    "turns": {
+      "min": 2,
+      "median": 6,
+      "max": 20,
+      "mean": 7.5
+    },
+    "decode_length_tok": {
+      "min": 1323,
+      "median": 13082,
+      "max": 41840,
+      "mean": 16080.6
+    },
+    "prompt_tokens": {
+      "min": 6930,
+      "median": 67851,
+      "max": 549539,
+      "mean": 103281.7
+    },
+    "avg_decode_s": 620.2,
+    "total_gen_tokens": 1286448,
+    "total_prompt_tokens": 8262539,
+    "latency_s": {
+      "min": 107.5,
+      "median": 2876.9,
+      "p90": 4390.2,
+      "p99": 4856.4,
+      "mean": 2781.5,
+      "max": 5034.8
+    },
+    "decode_s": {
+      "min": 75.8,
+      "median": 503.2,
+      "p90": 1255.6,
+      "p99": 1615.7,
+      "mean": 620.2,
+      "max": 1658.3
+    },
+    "ttft_s": {
+      "min": 22.6,
+      "median": 2350.4,
+      "p90": 3640.1,
+      "p99": 3978.6,
+      "mean": 2159.7,
+      "max": 4099.9
+    },
+    "tool_wait_s": {
+      "min": 0.0,
+      "median": 0.0,
+      "p90": 2.9,
+      "p99": 17.6,
+      "mean": 1.5,
+      "max": 67.0
+    },
+    "average_latency_s": 2781.5,
+    "p90_latency_s": 4390.2,
+    "p99_latency_s": 4856.4
+  },
+  "throughput": {
+    "wall_s": 5036.8,
+    "aggregate_gen_tps": 255.4,
+    "aggregate_prompt_tps": 1640.4,
+    "server_gen_tps": 255.4,
+    "server_prompt_tps": 1640.4
+  },
+  "kv_cache": {
+    "peak_perc": 100.0,
+    "avg_perc": 62.7
+  },
+  "prefix_cache": {
+    "hit_rate": 0.4704,
+    "queries_tok": 121967288,
+    "hits_tok": 57374064
+  },
+  "concurrency": {
+    "max_running": 80,
+    "avg_running": 9.9,
+    "max_waiting": 73
+  },
+  "preemptions": 57
+}

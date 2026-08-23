@@ -1,0 +1,27 @@
+{
+  "experiment": "03_concurrency32_nocache",
+  "agent": {
+    "completed": 32,
+    "turns": {
+      "min": 1,
+      "median": 3,
+      "max": 3,
+      "mean": 2.8
+    },
+    "decode_length_tok": {
+      "min": 667,
+      "median": 3093,
+      "max": 16311,
+      "mean": 4128.0
+    },
+    "prompt_tokens": {
+      "min": 2574,
+      "median": 15458,
+      "max": 33860,
+      "mean": 16066.3
+    },
+    "resolved": 2,
+    "total_gen": 132097,
+    "total_prompt": 514121
+  }
+}

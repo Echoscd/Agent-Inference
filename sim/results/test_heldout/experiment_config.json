@@ -1,0 +1,31 @@
+{
+  "preset": "test",
+  "seed0": 20260711,
+  "policies": [
+    "thunder",
+    "student_bdp",
+    "hazard_knapsack",
+    "hazard_grade_knapsack",
+    "hazard_batch_knapsack"
+  ],
+  "control_interval": 5.0,
+  "dt": 0.5,
+  "service_model": {
+    "prefill_single_tps": 7000.0,
+    "prefill_sat": 4.0,
+    "decode_single_tps": 45.0,
+    "decode_sat": 16.0,
+    "context_ref": 4096.0,
+    "prefill_context_penalty": 0.12,
+    "decode_context_penalty": 0.3,
+    "mixed_prefill_share": 0.3,
+    "max_batch": 64
+  },
+  "sim_config": {
+    "control_interval": 5.0,
+    "dt": 0.5,
+    "max_time": 20000.0,
+    "alpha_work": 0.25
+  },
+  "note": "Executed in checkpointed chunks; 45 held-out workload/capacity/seed scenarios."
+}

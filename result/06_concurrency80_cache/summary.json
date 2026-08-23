@@ -1,0 +1,37 @@
+{
+  "experiment": "06_concurrency80_cache (stopped early, 19/80)",
+  "note": "agents=fast-finishers only; server stats=full run",
+  "agent": {
+    "completed": 19,
+    "turns": {
+      "min": 2,
+      "median": 3,
+      "max": 5,
+      "mean": 3.3
+    },
+    "decode_length_tok": {
+      "min": 1410,
+      "median": 3066,
+      "max": 9247,
+      "mean": 3501.3
+    },
+    "prompt_tokens": {
+      "min": 0,
+      "median": 0,
+      "max": 0,
+      "mean": 0.0
+    },
+    "resolved": 0,
+    "total_gen": 66525,
+    "total_prompt": 0
+  },
+  "server": {
+    "kv_peak_perc": 100.0,
+    "kv_avg_perc": 95.3,
+    "max_running": 80,
+    "avg_running": 28.5,
+    "max_waiting": 54,
+    "prefix_hit_final_perc": 41.3,
+    "preemptions": 153
+  }
+}
