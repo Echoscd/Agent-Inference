@@ -1,0 +1,10 @@
+kind,metric,simulated,public_min,public_max,within_public_range,relative_error_to_range
+workload,mean_rounds,15.179166666666667,14.6,15.3,True,0.0
+workload,mean_total_decode_per_program,5929.570833333334,5499.2,6629.6,True,0.0
+workload,cv_total_decode_per_program,0.943293046870234,0.9,0.97,True,0.0
+workload,mean_submitted_prompt_per_program,235905.12083333332,235136.0,251274.0,True,0.0
+workload,mean_tool_s_per_program,13.220519469071784,10.8,18.3,True,0.0
+micro,prefill_ms_per_token_10k,0.12967315567622706,0.11,0.13,True,0.0
+micro,prefill_ms_per_token_40k,0.15960638425537024,0.15,0.17,True,0.0
+micro,decode_latency_growth_40k,0.07000000000000006,0.06,0.08,True,0.0
+micro,prefix_drop_over_reuse,11.228153781079726,10.0,13.0,True,0.0

@@ -1,0 +1,3 @@
+case,mechanism_removed_or_replaced,mean_program_ct,degradation_vs_full_pct,ci_low,ci_high,worse_seeds,repetitions,mean_decision_ms
+bdp_full,reference,416.8064954044729,0.0,0.0,0.0,0,20,0.1401446501273979
+legacy_action,minimal margin replaced by block normalization and tie heuristics,416.8064954044729,0.0,0.0,0.0,0,20,0.13981304757404373

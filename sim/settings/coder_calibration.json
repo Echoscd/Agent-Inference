@@ -1,0 +1,303 @@
+{
+  "schema_version": 1,
+  "setting_kind": "simulator_environment_not_results",
+  "preset": "coder_calibration",
+  "seed0": 20260826,
+  "units": {
+    "time": "seconds",
+    "token_count": "model tokens",
+    "kv_capacity": "tokens rounded to physical blocks",
+    "throughput": "tokens/second"
+  },
+  "execution_flow": [
+    "generate one ProgramSpec workload per scenario",
+    "reuse the identical realized ProgramSpec objects for every paired policy",
+    "run outer scheduler at t=0, periodically, and whenever router-paused READY work cannot otherwise progress",
+    "submit admitted turns to ENGINE_WAITING; throttle the all-at-once cold burst with the shared prefill/chunk budget, then use FCFS for sparse returns",
+    "advance asynchronous tools and shared prefill/decode GPU service by event-bounded dt",
+    "sample physical KV, states, token rates, completions, prefix hit, and preemptions at dt cadence",
+    "expand output reservations by evicting inactive caches when necessary",
+    "stop when every program reaches DONE"
+  ],
+  "program_state_machine": {
+    "states": [
+      "READY",
+      "ENGINE_WAITING",
+      "PREFILL",
+      "DECODE",
+      "TOOL",
+      "DONE"
+    ],
+    "normal_path": "READY -> ENGINE_WAITING -> PREFILL -> DECODE -> TOOL; retained TOOL returns directly to ENGINE_WAITING, paused TOOL returns to READY",
+    "active_preemption": {
+      "mode": "last-in-first-preempt to ENGINE_WAITING; dropped KV is recomputed inside the engine"
+    },
+    "tool_gpu_consumption": 0,
+    "all_programs_release_at": 0.0
+  },
+  "information_boundary": {
+    "policy_observes": [
+      "phase, stage, current prefix, revealed prompt",
+      "warm/cold flag and block counts",
+      "tool class and elapsed tool age",
+      "completed per-turn decode lengths for mixture-aware Bayesian scale updates",
+      "posterior terminal probability and expected remaining rounds",
+      "the fixed context guard used to condition remaining rounds",
+      "class-level prompt/decode/tool distributions",
+      "service model, capacity, and control interval"
+    ],
+    "policy_does_not_observe": [
+      "realized future decode length",
+      "realized remaining tool duration",
+      "realized total number of program turns"
+    ]
+  },
+  "random_distributions": {
+    "prompt_and_decode": {
+      "family": "gamma_then_rounded_to_positive_integer",
+      "shape_formula": "1 / CV^2",
+      "scale_formula": "mean / shape",
+      "program_decode_scale": "optional mean-one lognormal latent shared by a program's turns"
+    },
+    "turn_count_priors": {
+      "short": {
+        "family": "discretized_gamma_weights",
+        "shape": 2.0,
+        "scale": 2.0,
+        "support": [
+          1,
+          30
+        ],
+        "normalized_mean": 4.082876226873813
+      },
+      "coder16_empirical": {
+        "family": "empirical_pmf_from_public_26_27_28_per_agent_traces",
+        "sample_size": 480,
+        "censor_at": 20,
+        "support": [
+          1,
+          20
+        ],
+        "normalized_mean": 14.95
+      },
+      "coder20_natural": {
+        "family": "max_turns_mixture_before_context_limit_censoring",
+        "max_turn_probability": 0.7,
+        "early_exit_probability": 0.3,
+        "early_exit_support": [
+          3,
+          19
+        ],
+        "support": [
+          1,
+          20
+        ],
+        "normalized_mean": 17.3
+      }
+    },
+    "tool_duration": {
+      "coder_fast": {
+        "family": "lognormal",
+        "mean_seconds": 0.3,
+        "cv": 1.0
+      },
+      "coder_medium": {
+        "family": "lognormal",
+        "mean_seconds": 1.2,
+        "cv": 1.0
+      },
+      "coder_long": {
+        "family": "lognormal",
+        "mean_seconds": 5.0,
+        "cv": 1.2
+      }
+    },
+    "tool_mixes": {
+      "coder_tools": {
+        "coder_fast": 0.6,
+        "coder_medium": 0.32,
+        "coder_long": 0.08
+      }
+    }
+  },
+  "service_model": {
+    "profile": "qwen3_coder_30b_vllm_012",
+    "parameters": {
+      "prefill_single_tps": 8333.0,
+      "prefill_sat": 8.0,
+      "decode_single_tps": 85.0,
+      "decode_sat": 11.0,
+      "context_ref": 40960.0,
+      "prefill_context_penalty": 0.33,
+      "decode_context_penalty": 0.07,
+      "mixed_prefill_share": 0.15,
+      "mixed_prefill_multiplier": 1.0,
+      "mixed_decode_multiplier": 0.85,
+      "max_batch": 80,
+      "prefill_chunk_tokens": 8192
+    },
+    "aggregate_prefill_formula": "single_tps * n/(1+(n-1)/prefill_sat) / (1+prefill_context_penalty*mean_uncached/context_ref)",
+    "aggregate_decode_formula": "single_tps * n_eff/(1+(n_eff-1)/decode_sat) / (1+decode_context_penalty*mean_context/context_ref)",
+    "fallback_mixed_gpu_sharing": {
+      "prefill_share": 0.15,
+      "decode_share": 0.85
+    },
+    "measured_mixed_interference": {
+      "prefill_multiplier": 1.0,
+      "decode_multiplier": 0.85
+    }
+  },
+  "kv_model": {
+    "block_rounding": "ceil(tokens / block_size)",
+    "inactive_cache_blocks": "ceil(prefix_tokens / block_size)",
+    "admission_reservation": "ceil((prefix + revealed_prompt + distributional_decode_quantile) / block_size)",
+    "planning_used": "sum(active reserved blocks) + sum(inactive warm-cache blocks)",
+    "physical_used": "active materialized KV blocks only",
+    "warm_admission_prefill": "revealed incremental prompt only",
+    "cold_admission_prefill": "evicted prefix + revealed incremental prompt",
+    "router_overflow": "evict inactive retained programs by policy emergency order",
+    "allocation": "materialize KV by physical token growth; recompute-preempt active requests on pressure",
+    "apc": "completed/preempted blocks become hashes on the engine free list; allocation overwrites block-LRU hashes and may leave a partial prefix"
+  },
+  "simulation_config": {
+    "control_interval": 3.0,
+    "dt": 0.5,
+    "max_time": 20000.0,
+    "alpha_work": 0.25
+  },
+  "policies": {
+    "fcfs": {
+      "constructor_defaults": {},
+      "effective_initial_values": {}
+    },
+    "thunder": {
+      "constructor_defaults": {},
+      "effective_initial_values": {
+        "buffer_tokens": 100,
+        "acting_decay_base": 2.0,
+        "marked": 0,
+        "decay_calls": 0,
+        "decayed_cache_fraction_sum": 0.0
+      }
+    },
+    "bdp": {
+      "constructor_defaults": {},
+      "effective_initial_values": {
+        "price_sum": 0.0,
+        "price_max": 0.0,
+        "binding_updates": 0
+      }
+    }
+  },
+  "scenarios": [
+    {
+      "name": "coder80_calibration_r0",
+      "n_programs": 80,
+      "prompt_mean": 184.0,
+      "prompt_cv": 1.7,
+      "prompt_large_prob": 0.255,
+      "prompt_large_mean": 4930.0,
+      "prompt_large_cv": 0.16,
+      "initial_prompt_mean": 2788.0,
+      "initial_prompt_cv": 0.42,
+      "decode_mean": 162.0,
+      "decode_cv": 1.19,
+      "decode_large_prob": 0.068,
+      "decode_large_mean": 3619.0,
+      "decode_large_cv": 0.8,
+      "decode_program_cv": 0.5,
+      "prior_name": "coder20_natural",
+      "policy_prior_name": "coder16_empirical",
+      "policy_prompt_mean": 1600.0,
+      "policy_decode_mean": 300.0,
+      "policy_alpha_work": 0.03,
+      "tool_mix": "coder_tools",
+      "capacity_tokens": 670000,
+      "block_size": 16,
+      "reserve_quantile": 0.95,
+      "decode_reserve_tokens": 1024,
+      "context_limit_tokens": 35000,
+      "seed": 20260826
+    },
+    {
+      "name": "coder80_calibration_r1",
+      "n_programs": 80,
+      "prompt_mean": 184.0,
+      "prompt_cv": 1.7,
+      "prompt_large_prob": 0.255,
+      "prompt_large_mean": 4930.0,
+      "prompt_large_cv": 0.16,
+      "initial_prompt_mean": 2788.0,
+      "initial_prompt_cv": 0.42,
+      "decode_mean": 162.0,
+      "decode_cv": 1.19,
+      "decode_large_prob": 0.068,
+      "decode_large_mean": 3619.0,
+      "decode_large_cv": 0.8,
+      "decode_program_cv": 0.5,
+      "prior_name": "coder20_natural",
+      "policy_prior_name": "coder16_empirical",
+      "policy_prompt_mean": 1600.0,
+      "policy_decode_mean": 300.0,
+      "policy_alpha_work": 0.03,
+      "tool_mix": "coder_tools",
+      "capacity_tokens": 670000,
+      "block_size": 16,
+      "reserve_quantile": 0.95,
+      "decode_reserve_tokens": 1024,
+      "context_limit_tokens": 35000,
+      "seed": 20260827
+    },
+    {
+      "name": "coder80_calibration_r2",
+      "n_programs": 80,
+      "prompt_mean": 184.0,
+      "prompt_cv": 1.7,
+      "prompt_large_prob": 0.255,
+      "prompt_large_mean": 4930.0,
+      "prompt_large_cv": 0.16,
+      "initial_prompt_mean": 2788.0,
+      "initial_prompt_cv": 0.42,
+      "decode_mean": 162.0,
+      "decode_cv": 1.19,
+      "decode_large_prob": 0.068,
+      "decode_large_mean": 3619.0,
+      "decode_large_cv": 0.8,
+      "decode_program_cv": 0.5,
+      "prior_name": "coder20_natural",
+      "policy_prior_name": "coder16_empirical",
+      "policy_prompt_mean": 1600.0,
+      "policy_decode_mean": 300.0,
+      "policy_alpha_work": 0.03,
+      "tool_mix": "coder_tools",
+      "capacity_tokens": 670000,
+      "block_size": 16,
+      "reserve_quantile": 0.95,
+      "decode_reserve_tokens": 1024,
+      "context_limit_tokens": 35000,
+      "seed": 20260828
+    }
+  ],
+  "paired_evaluation": {
+    "paired_keys": [
+      "scenario",
+      "seed",
+      "tool_mix",
+      "capacity_tokens"
+    ],
+    "baselines": [
+      "fcfs",
+      "thunder"
+    ],
+    "primary_metric": "mean_program_completion_time"
+  },
+  "known_model_gaps": [
+    "one worker and one KV pool",
+    "aggregate fitted service curves rather than vLLM iteration traces",
+    "program-prefix LRU rather than the exact global hash-block order",
+    "preemption victim order is modeled, but vLLM's internal scheduler implementation is not replayed",
+    "one aggregate chunked-prefill budget rather than exact per-iteration token scheduling",
+    "no multiworker routing, locality, migration, or network cost",
+    "pooled tool classes rather than per-tool semantic replay"
+  ]
+}

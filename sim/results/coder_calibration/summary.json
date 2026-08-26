@@ -1,0 +1,13 @@
+{
+  "profile": "qwen3_coder_30b_vllm_012",
+  "seed0": 20260826,
+  "checks": 9,
+  "within_public_range": 9,
+  "failed_checks": [],
+  "micro": {
+    "prefill_ms_per_token_10k": 0.12967315567622706,
+    "prefill_ms_per_token_40k": 0.15960638425537024,
+    "decode_latency_growth_40k": 0.07000000000000006,
+    "prefix_drop_over_reuse": 11.228153781079726
+  }
+}

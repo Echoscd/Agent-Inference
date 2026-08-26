@@ -1,0 +1,50 @@
+{
+  "setting": "80_programs_all_arrive_at_t0",
+  "preset": "coder_experiment",
+  "seed0": 20261301,
+  "repetitions": 20,
+  "service_profile": "qwen3_coder_30b_vllm_012",
+  "sim_config": {
+    "control_interval": 3.0,
+    "dt": 0.5
+  },
+  "selection_rule": "an action candidate must improve mean completion time and show no statistically supported P90, P95, or makespan regression",
+  "cases": [
+    {
+      "name": "bdp_full",
+      "removed_or_replaced": "reference"
+    },
+    {
+      "name": "no_decode_update",
+      "removed_or_replaced": "Bayesian decode-scale update"
+    },
+    {
+      "name": "naive_decode_update",
+      "removed_or_replaced": "mixture-aware decode evidence"
+    },
+    {
+      "name": "no_context_guard",
+      "removed_or_replaced": "observable context conditioning"
+    },
+    {
+      "name": "no_k_survival_update",
+      "removed_or_replaced": "K survival posterior"
+    },
+    {
+      "name": "current_turn_only",
+      "removed_or_replaced": "remaining-program objective"
+    },
+    {
+      "name": "no_dual_price",
+      "removed_or_replaced": "KV dual price"
+    },
+    {
+      "name": "admission_footprint",
+      "removed_or_replaced": "future KV footprint"
+    },
+    {
+      "name": "legacy_action",
+      "removed_or_replaced": "minimal margin replaced by block normalization and tie heuristics"
+    }
+  ]
+}

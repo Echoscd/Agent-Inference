@@ -20,6 +20,7 @@ from realistic_agentic_sim import (
     TOOL_MIXES,
     TOOL_MODELS,
     SimConfig,
+    SERVICE_PROFILE_KWARGS,
     make_service_model,
     matrix,
 )
@@ -27,9 +28,17 @@ from realistic_agentic_sim import (
 
 PRIOR_FAMILIES = {
     "short": {"family": "discretized_gamma_weights", "shape": 2.0, "scale": 2.0},
-    "swebench9": {"family": "discretized_gamma_weights", "shape": 2.5, "scale": 3.5},
-    "quick10": {"family": "discretized_gamma_weights", "shape": 2.5, "scale": 4.0},
-    "long": {"family": "discretized_gamma_weights", "shape": 3.0, "scale": 6.2},
+    "coder16_empirical": {
+        "family": "empirical_pmf_from_public_26_27_28_per_agent_traces",
+        "sample_size": 480,
+        "censor_at": 20,
+    },
+    "coder20_natural": {
+        "family": "max_turns_mixture_before_context_limit_censoring",
+        "max_turn_probability": 0.70,
+        "early_exit_probability": 0.30,
+        "early_exit_support": [3, 19],
+    },
 }
 
 
@@ -69,15 +78,19 @@ def build_setting(preset: str, service_profile: str, seed0: int,
         "execution_flow": [
             "generate one ProgramSpec workload per scenario",
             "reuse the identical realized ProgramSpec objects for every paired policy",
-            "run outer scheduler at t=0, periodically, and whenever READY exists with no active GPU work",
+            "run outer scheduler at t=0, periodically, and whenever router-paused READY work cannot otherwise progress",
+            "submit admitted turns to ENGINE_WAITING; throttle the all-at-once cold burst with the shared prefill/chunk budget, then use FCFS for sparse returns",
             "advance asynchronous tools and shared prefill/decode GPU service by event-bounded dt",
+            "sample physical KV, states, token rates, completions, prefix hit, and preemptions at dt cadence",
             "expand output reservations by evicting inactive caches when necessary",
             "stop when every program reaches DONE",
         ],
         "program_state_machine": {
-            "states": ["READY", "PREFILL", "DECODE", "TOOL", "DONE"],
-            "normal_path": "READY -> PREFILL -> DECODE -> TOOL -> READY; final DECODE -> DONE",
-            "active_non_preemptive": True,
+            "states": ["READY", "ENGINE_WAITING", "PREFILL", "DECODE", "TOOL", "DONE"],
+            "normal_path": "READY -> ENGINE_WAITING -> PREFILL -> DECODE -> TOOL; retained TOOL returns directly to ENGINE_WAITING, paused TOOL returns to READY",
+            "active_preemption": {
+                "mode": "last-in-first-preempt to ENGINE_WAITING; dropped KV is recomputed inside the engine",
+            },
             "tool_gpu_consumption": 0,
             "all_programs_release_at": 0.0,
         },
@@ -86,7 +99,9 @@ def build_setting(preset: str, service_profile: str, seed0: int,
                 "phase, stage, current prefix, revealed prompt",
                 "warm/cold flag and block counts",
                 "tool class and elapsed tool age",
+                "completed per-turn decode lengths for mixture-aware Bayesian scale updates",
                 "posterior terminal probability and expected remaining rounds",
+                "the fixed context guard used to condition remaining rounds",
                 "class-level prompt/decode/tool distributions",
                 "service model, capacity, and control interval",
             ],
@@ -101,6 +116,7 @@ def build_setting(preset: str, service_profile: str, seed0: int,
                 "family": "gamma_then_rounded_to_positive_integer",
                 "shape_formula": "1 / CV^2",
                 "scale_formula": "mean / shape",
+                "program_decode_scale": "optional mean-one lognormal latent shared by a program's turns",
             },
             "turn_count_priors": {
                 name: {
@@ -131,9 +147,13 @@ def build_setting(preset: str, service_profile: str, seed0: int,
                 "single_tps * n_eff/(1+(n_eff-1)/decode_sat) / "
                 "(1+decode_context_penalty*mean_context/context_ref)"
             ),
-            "mixed_gpu_sharing": {
+            "fallback_mixed_gpu_sharing": {
                 "prefill_share": service.mixed_prefill_share,
                 "decode_share": 1.0 - service.mixed_prefill_share,
+            },
+            "measured_mixed_interference": {
+                "prefill_multiplier": service.mixed_prefill_multiplier,
+                "decode_multiplier": service.mixed_decode_multiplier,
             },
         },
         "kv_model": {
@@ -143,11 +163,12 @@ def build_setting(preset: str, service_profile: str, seed0: int,
                 "ceil((prefix + revealed_prompt + distributional_decode_quantile) / block_size)"
             ),
             "planning_used": "sum(active reserved blocks) + sum(inactive warm-cache blocks)",
-            "physical_used": "sum(active materialized KV blocks) + sum(inactive warm-cache blocks)",
+            "physical_used": "active materialized KV blocks only",
             "warm_admission_prefill": "revealed incremental prompt only",
             "cold_admission_prefill": "evicted prefix + revealed incremental prompt",
-            "reserve_overflow": "evict inactive caches by policy emergency order, then stall if still infeasible",
-            "partial_cache_retention": False,
+            "router_overflow": "evict inactive retained programs by policy emergency order",
+            "allocation": "materialize KV by physical token growth; recompute-preempt active requests on pressure",
+            "apc": "completed/preempted blocks become hashes on the engine free list; allocation overwrites block-LRU hashes and may leave a partial prefix",
         },
         "simulation_config": asdict(sim_config),
         "policies": {
@@ -157,18 +178,17 @@ def build_setting(preset: str, service_profile: str, seed0: int,
         "scenarios": [asdict(cfg) for cfg in scenarios],
         "paired_evaluation": {
             "paired_keys": ["scenario", "seed", "tool_mix", "capacity_tokens"],
-            "bootstrap_repetitions": 5000,
-            "bootstrap_seed": 7,
+            "baselines": ["fcfs", "thunder"],
             "primary_metric": "mean_program_completion_time",
         },
         "known_model_gaps": [
             "one worker and one KV pool",
-            "parametric rather than trace-fitted service curves",
-            "binary rather than partial prefix retention",
-            "no active-request preemption and recomputation",
-            "no chunked-prefill token budget or kernel transition model",
+            "aggregate fitted service curves rather than vLLM iteration traces",
+            "program-prefix LRU rather than the exact global hash-block order",
+            "preemption victim order is modeled, but vLLM's internal scheduler implementation is not replayed",
+            "one aggregate chunked-prefill budget rather than exact per-iteration token scheduling",
             "no multiworker routing, locality, migration, or network cost",
-            "proxy tool classes rather than recorded SWE-bench tool events",
+            "pooled tool classes rather than per-tool semantic replay",
         ],
     }
 
@@ -177,12 +197,12 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--preset",
-        choices=["smoke", "validation", "test", "real_proxy_smoke", "real_proxy"],
+        choices=["coder_calibration_smoke", "coder_calibration", "coder_experiment"],
         required=True,
     )
     parser.add_argument(
         "--service-profile",
-        choices=["synthetic", "qwen3_32b_vllm_proxy"],
+        choices=sorted(SERVICE_PROFILE_KWARGS),
         required=True,
     )
     parser.add_argument("--seed0", type=int, required=True)

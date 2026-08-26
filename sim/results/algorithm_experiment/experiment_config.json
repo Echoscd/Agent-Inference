@@ -1,0 +1,40 @@
+{
+  "preset": "coder_experiment",
+  "seed0": 20262101,
+  "repetitions": 20,
+  "policies": [
+    "fcfs",
+    "thunder",
+    "bdp"
+  ],
+  "policy_parameters": {
+    "fcfs": {},
+    "thunder": {},
+    "bdp": {}
+  },
+  "policy_initial_values": {
+    "fcfs": {},
+    "thunder": {
+      "buffer_tokens": 100,
+      "acting_decay_base": 2.0,
+      "marked": 0,
+      "decay_calls": 0,
+      "decayed_cache_fraction_sum": 0.0
+    },
+    "bdp": {
+      "lam": 0.0,
+      "epoch": 0,
+      "price_sum": 0.0,
+      "price_max": 0.0,
+      "binding_updates": 0
+    }
+  },
+  "baseline": "fcfs",
+  "service_profile": "qwen3_coder_30b_vllm_012",
+  "sim_config": {
+    "control_interval": 3.0,
+    "dt": 0.5,
+    "max_time": 20000.0,
+    "alpha_work": 0.25
+  }
+}

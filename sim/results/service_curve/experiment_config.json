@@ -1,0 +1,16 @@
+{
+  "setting": "80_programs_all_arrive_at_t0",
+  "seed": 20262101,
+  "policies": [
+    "fcfs",
+    "thunder",
+    "bdp",
+    "hindsight_index"
+  ],
+  "diagnostic_only": [
+    "hindsight_index"
+  ],
+  "service_profile": "qwen3_coder_30b_vllm_012",
+  "control_interval_s": 3.0,
+  "sample_interval_s": 0.5
+}

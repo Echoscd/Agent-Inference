@@ -1,0 +1,22 @@
+{
+  "setting": "80_programs_all_arrive_at_t0",
+  "preset": "coder_experiment",
+  "seed0": 20262201,
+  "repetitions": 20,
+  "service_profile": "qwen3_coder_30b_vllm_012",
+  "sim_config": {
+    "control_interval": 3.0,
+    "dt": 0.5
+  },
+  "selection_rule": "remove only action logic with paired zero effect; retain a mechanism when its 95% CI excludes zero degradation or it defines feasibility",
+  "cases": [
+    {
+      "name": "bdp_full",
+      "removed_or_replaced": "reference"
+    },
+    {
+      "name": "legacy_action",
+      "removed_or_replaced": "minimal margin replaced by block normalization and tie heuristics"
+    }
+  ]
+}

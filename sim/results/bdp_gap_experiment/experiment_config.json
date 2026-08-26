@@ -1,0 +1,20 @@
+{
+  "setting": "80_programs_all_arrive_at_t0",
+  "seed0": 20262101,
+  "repetitions": 20,
+  "baselines": [
+    "fcfs",
+    "thunder"
+  ],
+  "online_candidates": [
+    "bdp"
+  ],
+  "diagnostic_only": [
+    "no_context_bdp",
+    "turns_oracle",
+    "latent_oracle",
+    "program_mean_oracle",
+    "hindsight_index"
+  ],
+  "oracle_base": "bdp_with_one_nested_information_change"
+}
