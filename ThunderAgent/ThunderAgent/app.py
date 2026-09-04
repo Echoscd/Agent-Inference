@@ -289,6 +289,7 @@ def _create_router() -> MultiBackendRouter:
             "hz_horizon_s": config.hz_horizon_s,
             "hz_completion_bonus": config.hz_completion_bonus,
             "hz_prior": config.hz_prior,
+            "hz_max_batch": config.hz_max_batch,
         },
     )
 

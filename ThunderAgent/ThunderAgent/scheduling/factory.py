@@ -8,8 +8,10 @@ from .density import DensityPolicy
 from .dual_descent import DualDescentPolicy
 from .fidelity import FidelityPolicy
 from .hazard_grade import HazardGradePolicy
+from .hazard_grade_v2 import HazardGradeV2Policy
 
-POLICY_NAMES = ["size", "density", "dual_descent", "fidelity", "hazard_grade"]
+POLICY_NAMES = ["size", "density", "dual_descent", "fidelity", "hazard_grade",
+                "hazard_grade_v2"]
 
 
 def make_policy(
@@ -25,6 +27,7 @@ def make_policy(
     hz_horizon_s: float = 10.0,
     hz_completion_bonus: float = 1.5,
     hz_prior: str = "swebench9",
+    hz_max_batch: int = 64,
     **_,
 ) -> SchedulingPolicy:
     if name == "size":
@@ -44,5 +47,16 @@ def make_policy(
             horizon_s=hz_horizon_s,
             completion_bonus=hz_completion_bonus,
             prior_name=hz_prior,
+        )
+    if name == "hazard_grade_v2":
+        return HazardGradeV2Policy(
+            alpha=alpha,
+            decode_mean=hz_decode_mean,
+            prompt_mean=hz_prompt_mean,
+            decode_reserve=hz_decode_reserve,
+            horizon_s=hz_horizon_s,
+            completion_bonus=hz_completion_bonus,
+            prior_name=hz_prior,
+            max_batch=hz_max_batch,
         )
     raise ValueError(f"unknown policy {name!r}; known: {POLICY_NAMES}")
