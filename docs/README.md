@@ -10,6 +10,7 @@ each page below owns its subject and everything else links to it.
 | [metrics.md](metrics.md) | every metric definition: latency notions, windows, the warmup rule, percentiles |
 | [experiments.md](experiments.md) | what each `result/` folder is, including which ones are invalid |
 | [limitations.md](limitations.md) | what these results do not support, and why |
+| [decision_traces.md](decision_traces.md) | the per-tick scheduler traces: record format and how to read them |
 
 Not here, on purpose:
 

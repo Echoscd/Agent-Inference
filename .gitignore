@@ -3,7 +3,14 @@
 # completion). Regenerate by running the experiment; summary stats derived from
 # them (steady_metrics.*, results_*_summary.json) ARE tracked.
 result/**/tape_*.jsonl
+
+# Scheduler decision traces: one record per 3 s tick with every task's state and
+# the admit/evict choices. These are the only artifact that explains WHY a policy
+# behaved as it did, and they are ~1.3 MB per arm, so the coder A/B series (26-29)
+# is tracked. The Qwen3-32B series is not: those runs are longer and their traces
+# are 5-10 MB each.
 result/**/decision_trace_*.jsonl
+!result/2[6-9]_*/decision_trace_*.jsonl
 result/**/backend_*.log
 result/**/ta_*.log
 result/**/run_*.log
