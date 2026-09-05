@@ -82,6 +82,41 @@ vLLM restarted cold before each arm.
   Resolve favours hazard_grade in all three (14/11, 16/12, 14/11); throughput and
   tail-latency deltas are **not** significant at n=3 and change sign between
   replicates. Same config in all three (`scripts/run_replicates.sh coder <n> 1`).
+
+- **30/31_AB_coder_size_vs_bdp/** — size vs `bdp`, the online port of the
+  calibrated simulator's Bayesian-SERPT-plus-dual-price policy
+  (branch `sim/minimal-calibrated-bdp`). Two replicates, same config as 26-29.
+  The two runs **disagree in sign**: 30 has bdp at −6.9% throughput and +17.4%
+  p95, 31 has +7.5% and −38.9%. Experiment 31's size arm is the reason — its
+  total queue+prefill wait was 10,399 s against 6,000-6,500 s in the other three
+  arms, driven by a 77.4% prefix-cache hit rate, the lowest of the four.
+  Two things hold in both runs: bdp reaches the highest prefix-cache hit rate of
+  any policy tried (85.0% mean vs 76.7% for size) and the fewest preemptions
+  (2.0 vs 7.5), while running at size-like concurrency. It buys cache efficiency
+  and spends it on admitting less; the net effect on latency is inside the noise.
+  These are the first runs whose decision traces carry the policy's own scores
+  and whose tapes carry absolute timestamps (`timeline: recorded`).
+
+### Pooled comparison over the coder series
+
+Averaging the six size arms (26-31) gives a baseline with a p95 standard
+deviation of 28.3 s, or 22% of its mean. Against it, on the steady window:
+
+| policy | n | throughput | mean latency | p95 | resolved | prefix hit | preemptions |
+|---|---|---|---|---|---|---|---|
+| size (baseline) | 6 | 625.4 | 29.4 | 129.8 | 13.0/80 | 76.7% | 7.5 |
+| hazard family | 4 | 629.9 | 27.1 | 117.8 | 14.8/80 | 78.2% | 8.0 |
+| bdp | 2 | 595.2 | 26.3 | 117.3 | 14.0/80 | **85.0%** | **2.0** |
+
+`hazard_grade` (26-28) and `sim0823` (29) are two ports of the same algorithm
+from different simulator revisions, so they are pooled as one family.
+
+**The latency difference between the two families is not resolvable at this
+sample size**: their p95 differs by 0.4% against a baseline that varies by 22%.
+What is outside the noise is bdp's mechanism — +8.3 points of prefix-cache hit
+rate and 75% fewer preemptions — which does not convert into an end-to-end win
+because it also admits less.
+
 - **33_warmup_steady_metrics/** — cross-run rollup, not a run: post-warmup and
   steady-state throughput and p90/p95 for every arm above. See its own README.
 

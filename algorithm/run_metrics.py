@@ -30,6 +30,7 @@ reports which of the two applied.
 """
 import csv
 import json
+import math
 import os
 from dataclasses import dataclass, field
 
@@ -189,6 +190,46 @@ class Window:
                 tot += c.gen_tokens * ov / span
         return tot
 
+    def tps_bins(self, calls, bin_s=10.0):
+        """Instantaneous aggregate generation rate, one value per bin_s seconds.
+
+        A window's mean throughput hides how unevenly it was produced: a run can
+        sit at a quarter of its peak rate for a third of its length and still
+        report a healthy average. Each call's tokens are spread over its decode
+        interval at a constant rate and accumulated into the bins it covers.
+        """
+        n = max(1, int(math.ceil(self.duration / bin_s)))
+        bins = [0.0] * n
+        for c in calls:
+            span = c.end - c.decode_start
+            if span <= 0 or c.gen_tokens <= 0:
+                continue
+            s0, e0 = max(c.decode_start, self.t0), min(c.end, self.t1)
+            if e0 <= s0:
+                continue
+            rate = c.gen_tokens / span
+            i0 = max(0, int((s0 - self.t0) // bin_s))
+            i1 = min(n - 1, int((e0 - self.t0 - 1e-9) // bin_s))
+            for i in range(i0, i1 + 1):
+                lo = self.t0 + i * bin_s
+                bins[i] += rate * (min(e0, lo + bin_s) - max(s0, lo))
+        return [b / bin_s for b in bins]
+
+    def throughput_dist(self, calls, bin_s=10.0):
+        """Percentiles of the binned rate, plus how much of the window ran at
+        less than half the median rate."""
+        b = self.tps_bins(calls, bin_s)
+        if not b:
+            return {}
+        med = pctl(b, 50)
+        return {
+            "bin_s": bin_s, "bins": len(b),
+            "p10": round(pctl(b, 10), 1), "p25": round(pctl(b, 25), 1),
+            "p50": round(med, 1), "p75": round(pctl(b, 75), 1),
+            "p90": round(pctl(b, 90), 1),
+            "low_bin_fraction": round(sum(1 for x in b if x < 0.5 * med) / len(b), 3),
+        }
+
     def metrics(self, calls):
         started = self.started_in(calls)
         gen = self.gen_tokens(calls)
@@ -202,6 +243,7 @@ class Window:
             "gen_tps": round(gen / self.duration, 1),
             "prompt_tps": round(prompt / self.duration, 1),
             "calls_per_s": round(len(started) / self.duration, 3),
+            "gen_tps_dist": self.throughput_dist(calls),
             "latency_s": {k: round(pctl(lat, q), 1) for k, q in
                           (("p50", 50), ("p90", 90), ("p95", 95), ("p99", 99))},
             "latency_mean_s": round(sum(lat) / len(lat), 1) if lat else None,

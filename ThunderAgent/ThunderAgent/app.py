@@ -126,6 +126,10 @@ def register_routes(app: FastAPI, ta_router: MultiBackendRouter, config: Optiona
                 prompt_tokens or 0,
                 cached_tokens or 0,
             )
+            # Per-turn decode history: what this program actually generated, as
+            # opposed to known_decode which is a look-ahead. BDP's posterior uses it.
+            if completion_tokens:
+                program_state.observed_decode.append(int(completion_tokens))
             # Profile: record request end with KV cache info
             if program_state.profile:
                 program_state.profile.on_request_end(
@@ -290,6 +294,7 @@ def _create_router() -> MultiBackendRouter:
             "hz_completion_bonus": config.hz_completion_bonus,
             "hz_prior": config.hz_prior,
             "hz_max_batch": config.hz_max_batch,
+            "bdp_context_limit": config.bdp_context_limit,
         },
     )
 

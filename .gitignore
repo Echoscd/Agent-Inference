@@ -11,6 +11,7 @@ result/**/tape_*.jsonl
 # are 5-10 MB each.
 result/**/decision_trace_*.jsonl
 !result/2[6-9]_*/decision_trace_*.jsonl
+!result/3[0-9]_*/decision_trace_*.jsonl
 result/**/backend_*.log
 result/**/ta_*.log
 result/**/run_*.log

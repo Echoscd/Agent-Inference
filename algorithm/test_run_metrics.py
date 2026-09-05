@@ -144,3 +144,49 @@ def test_three_standard_windows_and_row_shape(tmp_path):
     assert (full.t0, warm.t0, steady.t0) == (0.0, 5.0, 5.0)
     assert steady.t1 == 20.0 and warm.t1 == full.t1 == a.wall_s
     assert len(rm.RunMetrics(a).to_row()) == len(rm.RunMetrics.columns())
+
+
+# ── throughput distribution over time ─────────────────────────────────────────
+def test_tps_bins_spread_a_call_over_the_bins_it_covers():
+    """A call decoding 1000 tokens over 30 s at a constant rate contributes
+    100 tok/s to each of three 10 s bins."""
+    c = _call(start=0, wait=0, decode=30, gen=3_000)
+    bins = rm.Window("w", 0, 30).tps_bins([c], bin_s=10.0)
+    assert bins == pytest.approx([100.0, 100.0, 100.0])
+
+
+def test_tps_bins_are_zero_where_nothing_decodes():
+    c = _call(start=0, wait=0, decode=10, gen=1_000)
+    bins = rm.Window("w", 0, 30).tps_bins([c], bin_s=10.0)
+    assert bins[0] == pytest.approx(100.0)
+    assert bins[1] == 0.0 and bins[2] == 0.0
+
+
+def test_binned_mean_matches_the_window_throughput():
+    calls = [_call(start=0, wait=0, decode=20, gen=2_000),
+             _call(start=10, wait=0, decode=20, gen=1_000)]
+    w = rm.Window("w", 0, 40)
+    binned = sum(w.tps_bins(calls, 10.0)) * 10.0
+    assert binned == pytest.approx(w.gen_tokens(calls))
+
+
+def test_throughput_dist_reports_the_low_tail():
+    """Three busy bins and one idle one: the idle bin is below half the median."""
+    calls = [_call(start=0, wait=0, decode=30, gen=3_000)]
+    d = rm.Window("w", 0, 40).throughput_dist(calls, bin_s=10.0)
+    assert d["bins"] == 4
+    assert d["p50"] > 0
+    assert d["low_bin_fraction"] == pytest.approx(0.25)
+
+
+def test_throughput_dist_is_in_the_window_metrics():
+    calls = [_call(start=0, wait=0, decode=30, gen=3_000)]
+    m = rm.Window("w", 0, 30).metrics(calls)
+    assert set(m["gen_tps_dist"]) >= {"p10", "p50", "p90", "low_bin_fraction", "bins"}
+
+
+def test_a_steady_run_has_no_low_bins():
+    calls = [_call(start=i * 10, wait=0, decode=10, gen=1_000) for i in range(4)]
+    d = rm.Window("w", 0, 40).throughput_dist(calls, bin_s=10.0)
+    assert d["low_bin_fraction"] == 0.0
+    assert d["p10"] == pytest.approx(d["p90"])

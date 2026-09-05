@@ -9,9 +9,10 @@ from .dual_descent import DualDescentPolicy
 from .fidelity import FidelityPolicy
 from .hazard_grade import HazardGradePolicy
 from .sim0823 import Sim0823Policy
+from .bdp import BDPPolicy
 
 POLICY_NAMES = ["size", "density", "dual_descent", "fidelity", "hazard_grade",
-                "sim0823"]
+                "sim0823", "bdp"]
 
 
 def make_policy(
@@ -28,6 +29,7 @@ def make_policy(
     hz_completion_bonus: float = 1.5,
     hz_prior: str = "swebench9",
     hz_max_batch: int = 64,
+    bdp_context_limit: int = 32768,
     **_,
 ) -> SchedulingPolicy:
     if name == "size":
@@ -58,5 +60,15 @@ def make_policy(
             completion_bonus=hz_completion_bonus,
             prior_name=hz_prior,
             max_batch=hz_max_batch,
+        )
+    if name == "bdp":
+        return BDPPolicy(
+            alpha=alpha,
+            decode_mean=hz_decode_mean,
+            prompt_mean=hz_prompt_mean,
+            decode_reserve=hz_decode_reserve,
+            prior_name=hz_prior,
+            max_batch=hz_max_batch,
+            context_limit=bdp_context_limit,
         )
     raise ValueError(f"unknown policy {name!r}; known: {POLICY_NAMES}")

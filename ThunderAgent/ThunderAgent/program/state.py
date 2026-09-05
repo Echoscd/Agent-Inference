@@ -48,4 +48,7 @@ class Program:
     known_decode: int = 0  # KNOWN decode length of current request (from X-Decode-Len); 0 = unknown
     last_prompt_tokens: int = 0  # prefill tokens of the program's last request (for warm/cold service time)
     last_cached_tokens: int = 0  # of last_prompt_tokens, how many were prefix-cache hits (warm prefix signal)
+    observed_decode: list = field(default_factory=list)  # completion_tokens of each
+                          # finished turn, in order. BDP's posterior shrinkage reads it;
+                          # unlike known_decode this is history, not a look-ahead.
     tool_class: str = ""  # coarse tool class of the CURRENT ACTING phase (from X-Tool-Class); "" = pooled fallback (hazard_grade)

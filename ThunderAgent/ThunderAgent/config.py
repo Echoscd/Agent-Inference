@@ -47,6 +47,7 @@ class Config:
     hz_horizon_s: float = 10.0         # tool return-probability lookahead horizon (s)
     hz_completion_bonus: float = 1.5   # weight on posterior terminal probability in cache value
     hz_prior: str = "swebench9"        # round-count prior name (tool_hazard.ROUND_PRIORS)
+    bdp_context_limit: int = 32768     # bdp only: server context guard (40960-8192)
     hz_max_batch: int = 64             # sim0823 only: per-tick admission cap (sim max_batch)
 
 

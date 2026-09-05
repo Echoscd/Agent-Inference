@@ -33,7 +33,7 @@ def main() -> int:
                         help="Use 2^(-t) decay for acting tokens in resume capacity calculation")
     parser.add_argument("--policy", default="size",
                         choices=["size", "density", "dual_descent", "fidelity", "hazard_grade",
-                                 "sim0823"],
+                                 "sim0823", "bdp"],
                         help="Scheduling policy: 'size' (token-size ordering), "
                              "'density' (admit/keep highest 1/(tau*footprint), evict lowest), "
                              "'dual_descent' (density minus a learned KV price; admit only density>lambda), "
@@ -56,6 +56,8 @@ def main() -> int:
                         help="hazard_grade: tool return-probability lookahead horizon in seconds")
     parser.add_argument("--hz-completion-bonus", type=float, default=1.5,
                         help="hazard_grade: weight on posterior terminal probability in cache value")
+    parser.add_argument("--bdp-context-limit", type=int, default=32768,
+                        help="bdp: context guard where the server rejects the next prompt")
     parser.add_argument("--hz-max-batch", type=int, default=64,
                         help="sim0823: per-tick admission cap (the simulator's max_batch)")
     parser.add_argument("--hz-prior", default="swebench9",
@@ -89,6 +91,7 @@ def main() -> int:
         hz_completion_bonus=args.hz_completion_bonus,
         hz_prior=args.hz_prior,
         hz_max_batch=args.hz_max_batch,
+        bdp_context_limit=args.bdp_context_limit,
     )
     set_config(config)
     
@@ -111,7 +114,7 @@ def main() -> int:
             print(f"   dual price: learned KV price lambda, eta0={args.dd_eta0} (admit only density>lambda)")
         if args.policy == "fidelity":
             print(f"   fidelity: peak reservation + proactive price eviction + warm/cold tau (Gaps 1/3/6)")
-        if args.policy in ("hazard_grade", "sim0823"):
+        if args.policy in ("hazard_grade", "sim0823", "bdp"):
             print(f"   hazard_grade: run_score=1/(current_work*remaining_work*blocks), no price gate;")
             print(f"     peak_pad={args.hz_decode_reserve} (Q95 reservation, NOT known_decode);")
             print(f"     cache knapsack: value=cold*P(tool<=+{args.hz_horizon_s}s)*(1+{args.hz_completion_bonus}*term_prob), prior={args.hz_prior}")
