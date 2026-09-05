@@ -836,12 +836,29 @@ class MultiBackendRouter:
             "step": state.step_count,
             "marked": state.marked_for_pause,
         }
+        # The policy's own scores for this task, so the trace explains WHY a task
+        # was admitted or evicted and not merely THAT it was. Recorded for every
+        # policy via the common interface; a policy that raises is simply skipped.
         dfn = getattr(self.policy, "density", None)
         if callable(dfn):
             try:
                 row["density"] = dfn(state)
             except Exception:
                 pass
+        try:
+            row["sort_key"] = [float(x) for x in self.policy.sort_key(state)]
+        except Exception:
+            pass
+        try:
+            row["evict_key"] = [float(x) for x in self.policy.evict_key(state)]
+        except Exception:
+            pass
+        try:
+            cv = self.policy.cache_value(state, time.time())
+            if cv:
+                row["cache_value"] = float(cv)
+        except Exception:
+            pass
         return row
 
     def _emit_decision_trace(self, reasoning, waiting, admitted, evicted) -> None:
